@@ -10,8 +10,9 @@
   --color-fb-text: #000000;
   --color-fb-text-secondary: #898F9C;
   --color-fb-white: #FFFFFF;
-  --color-fb-black: #000000;
-  
+  --color-fb-black: #29292a;
+  --color-fb-neutral: #F2F2F2;
+  --color-fb-neutral-hover: #D8DADF;
+  --color-fb-text: #050505;
   --font-family-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  
 }
