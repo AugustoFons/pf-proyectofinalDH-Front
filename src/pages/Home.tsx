@@ -25,7 +25,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
       setCurrentPageNumber(0); // Reset página al buscar
@@ -92,8 +92,9 @@ export default function Home() {
   };
 
   return (
-    <main className="pt-20 bg-fb-background min-h-screen">
+    <main className="pt-5 bg-fb-background min-h-screen">
       <div className="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-6">
+
         <Sidebar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
         <section className="col-span-9">
@@ -105,12 +106,8 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
-              // Mostrar skeletons mientras carga
-              Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                <CardSkeleton key={i} />
-              ))
+              Array.from({ length: PAGE_SIZE }).map((_, i) => <CardSkeleton key={i} />)
             ) : (
-              // Mostrar cards reales
               pageData?.content.map((p) => (
                 <Card
                   key={p.id}
@@ -123,11 +120,17 @@ export default function Home() {
               ))
             )}
           </div>
+        </section>
+      </div>
 
-          {/* Controles de paginación */}
-          {pageData && pageData.page.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
-              {/* Botón anterior */}
+      {pageData && pageData.page.totalPages > 1 && (
+        <div className="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-10">
+          <div className="grid grid-cols-12 gap-6">
+            <div className="col-span-3 hidden lg:block"></div>
+
+            {/* Controles de paginación */}
+            <div className="col-span-12 lg:col-span-9 flex items-center justify-center gap-2">
+
               <button
                 onClick={handlePreviousPage}
                 disabled={currentPageNumber === 0}
@@ -136,7 +139,6 @@ export default function Home() {
                 Anterior
               </button>
 
-              {/* Números de página */}
               <div className="flex gap-1">
                 {getPageNumbers().map((pageNum) => (
                   <button
@@ -152,7 +154,6 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* Botón siguiente */}
               <button
                 onClick={handleNextPage}
                 disabled={currentPageNumber >= pageData.page.totalPages - 1}
@@ -161,15 +162,13 @@ export default function Home() {
                 Siguiente
               </button>
 
-              {/* Info de página */}
               <span className="ml-4 text-sm text-gray-700">
                 Página {currentPageNumber + 1} de {pageData.page.totalPages}
-                {' '}({pageData.page.totalElements} productos)
               </span>
             </div>
-          )}
-        </section>
-      </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

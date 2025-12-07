@@ -10,7 +10,7 @@ export const Sidebar = ({ searchQuery, onSearchChange }: SidebarProps) => {
   };
 
   return (
-    <aside className="col-span-3 bg-fb-surface border border-fb-stroke rounded-lg p-4 h-[80vh] sticky top-24">
+    <aside className="col-span-3 bg-fb-surface border border-fb-stroke rounded-lg p-4 h-[80vh] sticky top-32 self-start overflow-y-auto">
       {/* Buscador */}
       <div className="mb-4">
         <input
