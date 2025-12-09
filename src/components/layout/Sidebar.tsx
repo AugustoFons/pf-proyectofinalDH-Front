@@ -1,10 +1,25 @@
+import { useEffect, useState } from "react";
+import { categoryService, type CategoryRes } from "../../services/categoryService";
+
 type SidebarProps = {
   searchQuery: string;
   onSearchChange: (query: string) => void;
 };
 
 export const Sidebar = ({ searchQuery, onSearchChange }: SidebarProps) => {
-  
+  const [categories, setCategories] = useState<CategoryRes[]>([]);
+
+
+  useEffect(() => {
+    categoryService.list()
+      .then((data) => {
+        setCategories(data);
+      })
+      .catch((error) => {
+        console.error("Error al cargar categorías:", error);
+      });
+  }, []);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearchChange(e.target.value);
   };
@@ -27,11 +42,18 @@ export const Sidebar = ({ searchQuery, onSearchChange }: SidebarProps) => {
         Categorías
       </h2>
       <ul className="space-y-2 text-fb-text-secondary">
-        <li className="hover:text-fb-primary cursor-pointer">Vehículos</li>
-        <li className="hover:text-fb-primary cursor-pointer">Propiedades</li>
-        <li className="hover:text-fb-primary cursor-pointer">Electrónica</li>
-        <li className="hover:text-fb-primary cursor-pointer">Hogar</li>
-        <li className="hover:text-fb-primary cursor-pointer">Ropa y accesorios</li>
+        {categories.map((category) => (
+          <li 
+            key={category.id} 
+            className="hover:text-fb-primary cursor-pointer"
+          >
+            {category.name}
+          </li>
+        ))}
+        
+        {categories.length === 0 && (
+          <li className="text-xs text-gray-400">Cargando...</li>
+        )}
       </ul>
     </aside>
   )
