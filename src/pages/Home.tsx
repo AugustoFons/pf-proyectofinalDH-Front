@@ -21,6 +21,7 @@ export default function Home() {
   const [pageData, setPageData] = useState<ApiPageResponse | null>(null);
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
   const [searchQuery, setSearchQuery] = useState(""); // estado para el termino de busqueda
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null); // categoria seleccionada
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,11 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  useEffect(() => {
+    setCurrentPageNumber(0);
+  }, [selectedCategoryId]);
+
+
   // Cargar productos cuando cambia el número de página
   useEffect(() => {
     setLoading(true);
@@ -42,14 +48,15 @@ export default function Home() {
     productService.search({
       page: currentPageNumber,
       size: PAGE_SIZE,
-      query: searchQuery || undefined
+      query: searchQuery || undefined,
+      categoryId: selectedCategoryId || undefined
     })
       .then((response: any) => {
         setPageData(response);
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [currentPageNumber, debouncedSearchQuery]);
+  }, [currentPageNumber, debouncedSearchQuery, selectedCategoryId]);
 
   const handlePreviousPage = () => {
     if (currentPageNumber > 0) {
@@ -95,7 +102,13 @@ export default function Home() {
     <main className="pt-5 bg-fb-background min-h-screen">
       <div className="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-6">
 
-        <Sidebar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <Sidebar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedCategoryId={selectedCategoryId}
+          onCategorySelect={setSelectedCategoryId}
+        />
+
 
         <section className="col-span-9">
           <h1 className="font-sans text-xl font-semibold text-fb-text mb-4">
@@ -123,7 +136,7 @@ export default function Home() {
         </section>
       </div>
 
-      {pageData && pageData.page.totalPages > 1 && (
+      {pageData && pageData.page.totalPages > 0 && (
         <div className="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-10">
           <div className="grid grid-cols-12 gap-6">
             <div className="col-span-3 hidden lg:block"></div>

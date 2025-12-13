@@ -23,7 +23,7 @@ export const productService = {
     p.set("page", String(params.page ?? 0));
     p.set("size", String(Math.min(params.size ?? 10, 10)));
     if (params.query?.trim()) p.set("query", params.query.trim());
-    if (params.categoryId) p.set("categoryId", String(params.categoryId));
+    if (params.categoryId != null) p.set("categoryId", String(params.categoryId));
     return api.get<Page<ProductRes>>(`/products/search?${p.toString()}`);
   },
 }
