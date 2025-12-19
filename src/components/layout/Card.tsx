@@ -15,7 +15,7 @@ export function Card({ id, title, image, price }: CardProps) {
         <img
           src={image || "/placeholder.png"}
           alt={title}
-          className="w-full object-cover"
+          className="w-full object-cover h-80"
         />
         <div className="p-3">
           <h2 className="font-sans text-sm font-bold text-fb-text">{title}</h2>

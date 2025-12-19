@@ -4,6 +4,7 @@ import { CardSkeleton } from "../components/layout/CardSkeleton";
 import { Sidebar } from "../components/layout/Sidebar";
 import { productService } from '../services/productService';
 import type { ProductRes } from "../types/product";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 const PAGE_SIZE = 10;
 
@@ -80,27 +81,35 @@ export default function Home() {
 
     const totalPages = pageData.page.totalPages;
     const current = currentPageNumber;
-    const pages: number[] = [];
 
-    // Mostrar máximo 5 páginas
-    let start = Math.max(0, current - 2);
-    let end = Math.min(totalPages - 1, start + 4);
+    // Siempre mostramos: 1, ..., (current-1,current,current+1), ..., last
+    const pages: (number | "ellipsis")[] = [];
 
-    // Ajustar si estamos cerca del final
-    if (end - start < 4) {
-      start = Math.max(0, end - 4);
-    }
+    const first = 0;
+    const last = totalPages - 1;
 
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
+    const add = (v: number | "ellipsis") => pages.push(v);
+
+    add(first);
+
+    const start = Math.max(first + 1, current - 1);
+    const end = Math.min(last - 1, current + 1);
+
+    if (start > first + 1) add("ellipsis");
+
+    for (let i = start; i <= end; i++) add(i);
+
+    if (end < last - 1) add("ellipsis");
+
+    if (last !== first) add(last);
 
     return pages;
   };
 
+
   return (
-    <main className="pt-5 bg-fb-background min-h-screen">
-      <div className="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-6">
+    <main className="pt-1 bg-fb-background min-h-screen">
+      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-6">
 
         <Sidebar
           searchQuery={searchQuery}
@@ -117,7 +126,7 @@ export default function Home() {
 
           {error && <p className="text-red-500">{error}</p>}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             {loading ? (
               Array.from({ length: PAGE_SIZE }).map((_, i) => <CardSkeleton key={i} />)
             ) : (
@@ -137,48 +146,82 @@ export default function Home() {
       </div>
 
       {pageData && pageData.page.totalPages > 0 && (
-        <div className="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-10">
+        <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-10">
           <div className="grid grid-cols-12 gap-6">
             <div className="col-span-3 hidden lg:block"></div>
 
             {/* Controles de paginación */}
-            <div className="col-span-12 lg:col-span-9 flex items-center justify-center gap-2">
-
-              <button
-                onClick={handlePreviousPage}
-                disabled={currentPageNumber === 0}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            <div className="col-span-12 lg:col-span-9 flex items-center justify-end">
+              <div
+                className="
+                  inline-flex items-center gap-1.5
+                  rounded-full border border-fb-stroke
+                  bg-fb-surface
+                  px-2 py-1.5
+                "
               >
-                Anterior
-              </button>
+                {/* Prev */}
+                <button
+                  onClick={handlePreviousPage}
+                  disabled={currentPageNumber === 0}
+                  className="
+                    h-9 w-9 grid place-items-center rounded-full
+                    text-fb-text
+                    hover:bg-blue-50 hover:text-fb-primary
+                    disabled:opacity-40 disabled:cursor-not-allowed
+                    transition
+                  "
+                >
+                  <HiChevronLeft className="w-5 h-5" />
+                </button>
 
-              <div className="flex gap-1">
-                {getPageNumbers().map((pageNum) => (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageClick(pageNum)}
-                    className={`px-4 py-2 border rounded-md text-sm font-medium ${pageNum === currentPageNumber
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
-                  >
-                    {pageNum + 1}
-                  </button>
-                ))}
+                {/* Pages */}
+                <div className="flex items-center gap-1 px-1">
+                  {getPageNumbers().map((p: any, idx: number) =>
+                    p === "ellipsis" ? (
+                      <span
+                        key={`e-${idx}`}
+                        className="px-2 text-xs text-fb-text-secondary select-none"
+                      >
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => handlePageClick(p)}
+                        className={`
+                          h-8 min-w-8 px-2.5 rounded-full text-sm
+                          transition
+                          ${p === currentPageNumber
+                            ? "bg-blue-50 text-fb-primary border border-blue-100"
+                            : "text-fb-text-secondary hover:bg-fb-neutral"
+                          }
+                        `}
+                        aria-current={p === currentPageNumber ? "page" : undefined}
+                      >
+                        {p + 1}
+                      </button>
+                    )
+                  )}
+                </div>
+
+                {/* Next */}
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPageNumber >= pageData.page.totalPages - 1}
+                  className="
+                    h-9 w-9 grid place-items-center rounded-full
+                    text-fb-text
+                    hover:bg-blue-50 hover:text-fb-primary
+                    disabled:opacity-40 disabled:cursor-not-allowed
+                    transition
+                  "
+                >
+                  <HiChevronRight className="w-5 h-5" />
+                </button>
               </div>
-
-              <button
-                onClick={handleNextPage}
-                disabled={currentPageNumber >= pageData.page.totalPages - 1}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Siguiente
-              </button>
-
-              <span className="ml-4 text-sm text-gray-700">
-                Página {currentPageNumber + 1} de {pageData.page.totalPages}
-              </span>
             </div>
+
           </div>
         </div>
       )}
