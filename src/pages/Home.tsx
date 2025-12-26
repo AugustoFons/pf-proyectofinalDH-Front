@@ -18,12 +18,13 @@ type ApiPageResponse = {
   };
 };
 
-export default function Home() {
+export default function Home({ adminMode = false }: { adminMode?: boolean }) {
   const [pageData, setPageData] = useState<ApiPageResponse | null>(null);
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
   const [searchQuery, setSearchQuery] = useState(""); // estado para el termino de busqueda
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null); // categoria seleccionada
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [reloadTick, setReloadTick] = useState(0); // refrescar al borrar
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +58,7 @@ export default function Home() {
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [currentPageNumber, debouncedSearchQuery, selectedCategoryId]);
+  }, [currentPageNumber, debouncedSearchQuery, selectedCategoryId, reloadTick]);
 
   const handlePreviousPage = () => {
     if (currentPageNumber > 0) {
@@ -138,6 +139,8 @@ export default function Home() {
                   image={p.images?.[0]}
                   description={p.description}
                   price={p.price}
+                  adminMode={adminMode}
+                  onDeleted={() => setReloadTick((t) => t + 1)}
                 />
               ))
             )}

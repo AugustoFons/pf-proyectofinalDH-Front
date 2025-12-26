@@ -38,20 +38,33 @@ export default function Header() {
 
           {/* Botón Administración (solo visible si devAdmin = true) */}
           {devAdmin && (
-            <NavLink
-              to="/administracion"
-              className={({ isActive }) =>
-                `
+            <>
+              <NavLink
+                to="/administracion/productos/nuevo"
+                className="
+                  px-4 py-2 rounded-md font-sans font-medium transition
+                  bg-fb-primary text-fb-white shadow-md
+                  hover:bg-fb-primary-hover
+                "
+              >
+                + Crear
+              </NavLink>
+              <NavLink
+                to="/administracion"
+                className={({ isActive }) =>
+                  `
                   px-4 py-2 rounded-md font-sans font-medium transition
                   ${isActive
-                  ? "bg-fb-primary text-fb-white shadow-md"
-                  : "bg-fb-surface text-fb-primary border border-fb-primary hover:bg-fb-primary/10"
-                }
+                    ? "bg-fb-primary text-fb-white shadow-md"
+                    : "bg-fb-surface text-fb-primary border border-fb-primary hover:bg-fb-primary/10"
+                  }
               `
-              }
-            >
-              Administración
-            </NavLink>
+                }
+              >
+                Administración
+              </NavLink>
+            </>
+
           )}
 
 
