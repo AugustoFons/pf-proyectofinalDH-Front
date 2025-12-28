@@ -40,7 +40,7 @@ export default function Header() {
           {devAdmin && (
             <>
               <NavLink
-                to="/administracion/productos/nuevo"
+                to="/administracion/producto/nuevo"
                 className="
                   px-4 py-2 rounded-md font-sans font-medium transition
                   bg-fb-primary text-fb-white shadow-md

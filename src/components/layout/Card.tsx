@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { productService } from "../../services/productService";
 
 type CardProps = {
@@ -16,7 +16,7 @@ export function Card({ id, title, image, price, adminMode = false, onDeleted }: 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    window.location.href = `/administracion/productos/${id}/editar`;
+    window.location.href = `/administracion/producto/${id}/editar`;
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
