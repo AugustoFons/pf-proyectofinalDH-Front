@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { productService } from "../../services/productService";
 import { categoryService, type CategoryRes } from "../../services/categoryService";
 import type { ProductRes } from "../../types/product";
+import { TbArrowLeft } from "react-icons/tb";
 
 type Props = { mode: "create" | "edit" };
 
@@ -110,8 +111,9 @@ export default function AdminProductForm({ mode }: Props) {
 
             <NavLink
               to="/administracion"
-              className="px-4 py-2 rounded-md font-sans font-medium transition bg-fb-surface text-fb-primary border border-fb-primary hover:bg-fb-primary/10"
+              className="px-4 py-2 rounded-md font-sans font-medium transition bg-fb-surface text-fb-primary border border-fb-primary hover:bg-fb-primary/10 flex items-center gap-[0.5px]"
             >
+              <TbArrowLeft size={18} strokeWidth={2.5} />
               Volver
             </NavLink>
           </div>
@@ -162,7 +164,7 @@ export default function AdminProductForm({ mode }: Props) {
                     <button
                       type="button"
                       onClick={addImg}
-                      className="px-3 py-1.5 rounded-md font-sans font-medium transition bg-fb-surface text-fb-primary border border-fb-primary hover:bg-fb-primary/10 text-sm"
+                      className="px-3 py-1.5 rounded-md font-sans font-medium transition bg-fb-surface text-fb-primary border border-fb-primary hover:bg-fb-primary/10 text-sm cursor-pointer"
                     >
                       + Agregar
                     </button>
@@ -194,7 +196,7 @@ export default function AdminProductForm({ mode }: Props) {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="bg-fb-primary hover:bg-fb-primary-hover text-fb-white font-sans font-medium px-4 py-2 rounded-md transition disabled:opacity-60"
+                    className="bg-fb-primary hover:bg-fb-primary-hover text-fb-white font-sans font-medium px-4 py-2 rounded-md transition disabled:opacity-60 cursor-pointer"
                   >
                     {saving ? "Guardando..." : isEdit ? "Guardar" : "Crear"}
                   </button>

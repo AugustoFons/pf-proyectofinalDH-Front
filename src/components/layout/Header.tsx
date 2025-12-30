@@ -21,7 +21,7 @@ export default function Header() {
 
   return (
     <header className="w-full sticky top-0 left-0 z-50 bg-fb-surface border-b border-fb-stroke">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-28 flex items-center justify-between">
+      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 h-28 flex items-center justify-between">
 
         {/* Logo + Lema */}
         <NavLink to="/" className="flex items-center gap-4">

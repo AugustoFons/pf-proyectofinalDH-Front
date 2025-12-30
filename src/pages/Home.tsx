@@ -119,7 +119,6 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
           onCategorySelect={setSelectedCategoryId}
         />
 
-
         <section className="col-span-9">
           <h1 className="font-sans text-xl font-semibold text-fb-text mb-4">
             Recomendaciones de hoy
@@ -169,7 +168,7 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
                   disabled={currentPageNumber === 0}
                   className="
                     h-9 w-9 grid place-items-center rounded-full
-                    text-fb-text
+                    text-fb-text cursor-pointer
                     hover:bg-blue-50 hover:text-fb-primary
                     disabled:opacity-40 disabled:cursor-not-allowed
                     transition
@@ -193,7 +192,7 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
                         key={p}
                         onClick={() => handlePageClick(p)}
                         className={`
-                          h-8 min-w-8 px-2.5 rounded-full text-sm
+                          h-8 min-w-8 px-2.5 rounded-full text-sm cursor-pointer
                           transition
                           ${p === currentPageNumber
                             ? "bg-blue-50 text-fb-primary border border-blue-100"
@@ -214,7 +213,7 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
                   disabled={currentPageNumber >= pageData.page.totalPages - 1}
                   className="
                     h-9 w-9 grid place-items-center rounded-full
-                    text-fb-text
+                    text-fb-text cursor-pointer
                     hover:bg-blue-50 hover:text-fb-primary
                     disabled:opacity-40 disabled:cursor-not-allowed
                     transition

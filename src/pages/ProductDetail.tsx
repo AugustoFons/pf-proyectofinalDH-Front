@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { productService } from "../services/productService";
+import { TbArrowLeft } from "react-icons/tb";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -32,24 +33,13 @@ export default function ProductDetail() {
   const images: string[] = product.images?.length ? product.images : ["/placeholder.png"];
 
   return (
-    <main className="pt-20 bg-fb-background min-h-screen pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Flecha volver */}
-        <div className="flex justify-between items-center mb-4">
-          <span /> {/* para que el título del header general no se deforme */}
-          <button
-            onClick={() => navigate(-1)}
-            className="text-fb-primary text-sm font-semibold hover:underline"
-          >
-            ← Volver
-          </button>
-        </div>
+    <main className="pt-1 bg-fb-background min-h-screen pb-16">
+      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="grid grid-cols-12 gap-8">
 
-          {/* GALERÍA IZQUIERDA */}
-          <section className="col-span-12 lg:col-span-8">
+          {/* GALERÍA */}
+          <section className="col-span-12 lg:col-span-7">
             {/* Imagen principal */}
             <div className="rounded-xl overflow-hidden bg-black/5">
               <img
@@ -67,11 +57,10 @@ export default function ProductDetail() {
                     key={index}
                     type="button"
                     onClick={() => setActiveIndex(index)}
-                    className={`flex-shrink-0 rounded-lg overflow-hidden border ${
-                      index === activeIndex
-                        ? "border-fb-primary"
-                        : "border-fb-stroke hover:border-fb-primary/70"
-                    }`}
+                    className={`flex-shrink-0 rounded-lg overflow-hidden cursor-pointer border-[2.5px] ${index === activeIndex
+                      ? "border-fb-primary"
+                      : "border-fb-stroke hover:border-fb-primary/70"
+                      }`}
                   >
                     <img
                       src={img}
@@ -85,8 +74,19 @@ export default function ProductDetail() {
           </section>
 
           {/* SIDEBAR DERECHA */}
-          <aside className="col-span-12 lg:col-span-4">
+          <aside className="col-span-12 lg:col-span-5">
             <div className="bg-fb-surface border border-fb-stroke rounded-xl p-6 shadow-sm">
+
+              {/* Flecha volver */}
+              <button
+                onClick={() => navigate(-1)}
+                className="text-fb-primary font-sans font-medium hover:underline float-right cursor-pointer flex items-center gap-[0.7px]"
+              >
+              <TbArrowLeft size={18} strokeWidth={2.5} />
+                Volver
+              </button>
+
+
               {/* Título y precio */}
               <h1 className="text-xl font-semibold text-fb-text mb-1">
                 {product.name}
@@ -96,8 +96,8 @@ export default function ProductDetail() {
               </p>
 
               {/* Botón reservar/comprar */}
-              <button className="w-full py-3 rounded-lg bg-fb-primary text-white font-semibold hover:bg-fb-primary-dark transition">
-                Reservar / Comprar
+              <button className="w-full py-3 rounded-lg bg-fb-primary text-white font-semibold hover:bg-fb-primary-dark transition cursor-pointer">
+                Comprar
               </button>
 
               {/* Ubicación u otros datos */}
