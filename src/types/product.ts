@@ -1,6 +1,6 @@
 export type ProductRes = {
   id: number; name: string; description?: string; price?: number;
-  images: string[]; categories: number[];
+  images: string[]; categories: number[]; productType?: string;
 };
 
 export type Page<T> = {
@@ -8,7 +8,7 @@ export type Page<T> = {
 };
 
 export type ProductCreateReq = {
-  name: string; description?: string; price?: number; imageUrls?: string[]; categoryIds?: number[];
+  name: string; description?: string; price?: number; imageUrls?: string[]; categoryIds?: number[]; productType?: string;
 };
 
 export type ProductUpdateReq = ProductCreateReq;

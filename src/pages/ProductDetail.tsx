@@ -11,6 +11,8 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  console.log("Product ID:", product);
+
   useEffect(() => {
     setLoading(true);
     productService
@@ -97,7 +99,9 @@ export default function ProductDetail() {
 
               {/* Botón reservar/comprar */}
               <button className="w-full py-3 rounded-lg bg-fb-primary text-white font-semibold hover:bg-fb-primary-dark transition cursor-pointer">
-                Comprar
+                {
+                  product.productType === "RESERVA" ? "Reservar ahora" : "Comprar ahora"
+                }
               </button>
 
               {/* Ubicación u otros datos */}

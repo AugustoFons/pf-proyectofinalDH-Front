@@ -25,6 +25,7 @@ export default function AdminProductForm({ mode }: Props) {
   const [price, setPrice] = useState<string>("");
   const [imageUrls, setImageUrls] = useState<string[]>([""]);
   const [categoryIds, setCategoryIds] = useState<number[]>([]);
+  const [productType, setProductType] = useState<"RESERVA" | "VENTA">("VENTA");
 
   useEffect(() => {
     categoryService.list().then(setCategories).catch(() => setCategories([]));
@@ -42,6 +43,7 @@ export default function AdminProductForm({ mode }: Props) {
         setPrice(p.price != null ? String(p.price) : "");
         setImageUrls(p.images?.length ? p.images : [""]);
         setCategoryIds(p.categories ?? []);
+        setProductType(p.productType === "RESERVA" ? "RESERVA" : "VENTA");
       })
       .catch((e: any) => setError(e?.message ?? "Error cargando producto"))
       .finally(() => setLoading(false));
@@ -78,6 +80,7 @@ export default function AdminProductForm({ mode }: Props) {
       price: price.trim() ? Number(price) : null,
       imageUrls: imageUrls.map((x) => x.trim()).filter(Boolean),
       categoryIds,
+      productType
     };
 
     setSaving(true);
@@ -124,7 +127,7 @@ export default function AdminProductForm({ mode }: Props) {
             <p className="mt-6 text-fb-text-secondary">Cargando...</p>
           ) : (
             <form
-              onSubmit={onSubmit} 
+              onSubmit={onSubmit}
               className="mt-6 grid grid-cols-12 gap-6">
               <div className="col-span-12 lg:col-span-7 space-y-5">
 
@@ -145,6 +148,38 @@ export default function AdminProductForm({ mode }: Props) {
                     inputMode="decimal"
                     className="w-full px-3 py-2 border border-fb-stroke rounded-lg focus:outline-none focus:ring-2 focus:ring-fb-primary"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-fb-text mb-1">
+                    Tipo de producto
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setProductType("VENTA")}
+                      className={[
+                        "flex-1 px-4 py-2 rounded-lg font-medium transition border",
+                        productType === "VENTA"
+                          ? "bg-fb-primary text-fb-white border-fb-primary"
+                          : "bg-fb-surface text-fb-text-secondary border-fb-stroke hover:bg-black/5"
+                      ].join(" ")}
+                    >
+                      Venta
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProductType("RESERVA")}
+                      className={[
+                        "flex-1 px-4 py-2 rounded-lg font-medium transition border",
+                        productType === "RESERVA"
+                          ? "bg-fb-primary text-fb-white border-fb-primary"
+                          : "bg-fb-surface text-fb-text-secondary border-fb-stroke hover:bg-black/5"
+                      ].join(" ")}
+                    >
+                      Reserva
+                    </button>
+                  </div>
                 </div>
 
                 <div>
