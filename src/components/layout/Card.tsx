@@ -41,13 +41,13 @@ export function Card({ id, title, image, price, adminMode = false, onDeleted }: 
           <div className="absolute top-3 right-3 z-10 flex gap-2">
             <button
               onClick={handleEdit}
-              className="px-3 py-1.5 rounded-md text-xs font-semibold border border-fb-stroke bg-fb-surface hover:bg-black/5 transition"
+              className="px-3 py-1.5 rounded-md text-xs font-semibold border border-fb-stroke bg-fb-surface hover:bg-black/5 transition cursor-pointer"
             >
               Editar
             </button>
             <button
               onClick={handleDelete}
-              className="px-3 py-1.5 rounded-md text-xs font-semibold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition"
+              className="px-3 py-1.5 rounded-md text-xs font-semibold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition cursor-pointer"
             >
               Eliminar
             </button>

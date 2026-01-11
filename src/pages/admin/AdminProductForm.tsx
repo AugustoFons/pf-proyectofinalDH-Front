@@ -159,7 +159,7 @@ export default function AdminProductForm({ mode }: Props) {
                       type="button"
                       onClick={() => setProductType("VENTA")}
                       className={[
-                        "flex-1 px-4 py-2 rounded-lg font-medium transition border",
+                        "flex-1 px-4 py-2 rounded-lg font-medium transition border cursor-pointer",
                         productType === "VENTA"
                           ? "bg-fb-primary text-fb-white border-fb-primary"
                           : "bg-fb-surface text-fb-text-secondary border-fb-stroke hover:bg-black/5"
@@ -171,7 +171,7 @@ export default function AdminProductForm({ mode }: Props) {
                       type="button"
                       onClick={() => setProductType("RESERVA")}
                       className={[
-                        "flex-1 px-4 py-2 rounded-lg font-medium transition border",
+                        "flex-1 px-4 py-2 rounded-lg font-medium transition border cursor-pointer",
                         productType === "RESERVA"
                           ? "bg-fb-primary text-fb-white border-fb-primary"
                           : "bg-fb-surface text-fb-text-secondary border-fb-stroke hover:bg-black/5"
@@ -217,7 +217,7 @@ export default function AdminProductForm({ mode }: Props) {
                         <button
                           type="button"
                           onClick={() => removeImg(idx)}
-                          className="px-3 py-2 rounded-lg border border-fb-stroke hover:bg-black/5 transition text-fb-text-secondary"
+                          className="px-3 py-2 rounded-lg border border-fb-stroke hover:bg-black/5 transition text-fb-text-secondary cursor-pointer"
                           title="Quitar"
                         >
                           ✕

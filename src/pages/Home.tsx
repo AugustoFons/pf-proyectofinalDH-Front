@@ -110,7 +110,7 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
 
   return (
     <main className="pt-1 bg-fb-background min-h-screen">
-      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-6">
+      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 grid grid-cols-12 gap-6">
 
         <Sidebar
           searchQuery={searchQuery}
@@ -121,7 +121,7 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
 
         <section className="col-span-9">
           <h1 className="font-sans text-xl font-semibold text-fb-text mb-4">
-            Recomendaciones de hoy
+            { adminMode ? "Lista de Productos" : "Recomendaciones de hoy" }
           </h1>
 
           {error && <p className="text-red-500">{error}</p>}

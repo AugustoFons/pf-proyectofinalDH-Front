@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd } from "react-icons/hi";
+import { FiLogIn, FiLogOut } from "react-icons/fi";
+import { BiAddToQueue } from "react-icons/bi";
 
 export default function Header() {
-
   const navigate = useNavigate();
+
   const [devAdmin, setDevAdmin] = useState(
     () => localStorage.getItem("devAdmin") === "true"
   );
@@ -19,82 +22,179 @@ export default function Header() {
     navigate("/");
   };
 
-  return (
-    <header className="w-full sticky top-0 left-0 z-50 bg-fb-surface border-b border-fb-stroke">
-      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 h-28 flex items-center justify-between">
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const closeMenu = () => setIsMenuOpen(false);
 
-        {/* Logo + Lema */}
-        <NavLink to="/" className="flex items-center gap-4">
+  /* ===== Button styles (modern / minimal) ===== */
+  const btnBase =
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap select-none " +
+    "rounded-full px-4 py-2 text-sm lg:text-base font-medium " +
+    "transition-all duration-200 " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fb-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-fb-surface " +
+    "active:translate-y-0";
+
+  const btnPrimary =
+    btnBase +
+    " bg-fb-primary text-fb-white " +
+    "shadow-sm hover:shadow-md hover:-translate-y-[1px] " +
+    "hover:bg-fb-primary-hover";
+
+  const btnGhost =
+    btnBase +
+    " bg-transparent text-fb-primary cursor-pointer " +
+    "border border-fb-stroke " +
+    "hover:bg-fb-primary/10 hover:border-fb-primary/30";
+
+  const btnDangerGhost =
+    btnBase +
+    " bg-transparent text-fb-black cursor-pointer " +
+    "border border-fb-stroke " +
+    "hover:bg-fb-neutral/60 hover:border-fb-neutral";
+
+  const btnSuccess =
+    btnBase +
+    " bg-[#42B72A] text-fb-white cursor-pointer " +
+    "shadow-sm hover:shadow-md hover:-translate-y-[1px] hover:bg-green-600";
+
+  const mobileItem =
+    "w-full rounded-xl px-4 py-3 font-medium cursor-pointer " +
+    "transition-all duration-200 " +
+    "flex items-center justify-between gap-2 " +
+    "border border-fb-stroke/70 " +
+    "hover:border-fb-primary/25 hover:bg-fb-primary/10";
+
+  return (
+    <header className="w-full sticky top-0 left-0 z-50 bg-fb-surface border-b border-fb-stroke shadow-xs">
+      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 h-16 sm:h-20 lg:h-28 flex items-center justify-between">
+        {/* Logo */}
+        <NavLink to="/" className="flex items-center gap-3" onClick={closeMenu}>
           <div className="bg-fb-primary text-fb-white font-bold rounded-lg text-[28px] w-12 h-11 flex items-center justify-center">
-            <span className="transform -translate-y-[3px]">m</span>
+            <span className="-translate-y-[3px]">m</span>
           </div>
-          <span className="font-sans text-2xl font-semibold text-fb-primary tracking-tight italic skew-x-12 relative -top-0.5">
+          <span className="font-sans text-lg sm:text-xl lg:text-2xl font-semibold text-fb-primary tracking-tight italic skew-x-12 relative -top-0.5">
             marketplease!
           </span>
         </NavLink>
 
-        {/* Botones */}
-        <div className="flex gap-4 relative -top-0.5">
+        {/* Mobile toggle */}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden p-2 rounded-full border border-fb-stroke/70 text-fb-primary hover:bg-fb-primary/10 hover:border-fb-primary/30 transition cursor-pointer"
+          aria-label="Menú"
+        >
+          {isMenuOpen ? <HiX size={22} /> : <HiMenu size={22} />}
+        </button>
 
-          {/* Botón Administración (solo visible si devAdmin = true) */}
+        {/* Desktop buttons */}
+        <div className="hidden md:flex gap-3 relative -top-0.5">
           {devAdmin && (
             <>
-              <NavLink
-                to="/administracion/producto/nuevo"
-                className="
-                  px-4 py-2 rounded-md font-sans font-medium transition
-                  bg-fb-primary text-fb-white shadow-md
-                  hover:bg-fb-primary-hover
-                "
-              >
-                + Crear
+              <NavLink to="/administracion/producto/nuevo" className={btnPrimary}>
+                <BiAddToQueue size={18} />
+                <span>Publicar</span>
               </NavLink>
+
               <NavLink
                 to="/administracion"
-                className={({ isActive }) =>
-                  `
-                  px-4 py-2 rounded-md font-sans font-medium transition
-                  ${isActive
-                    ? "bg-fb-primary text-fb-white shadow-md"
-                    : "bg-fb-surface text-fb-primary border border-fb-primary hover:bg-fb-primary/10"
-                  }
-              `
-                }
+                className={({ isActive }) => (isActive ? btnPrimary : btnGhost)}
               >
-                Administración
+                <HiCog size={18} />
+                <span>Administración</span>
               </NavLink>
             </>
-
           )}
 
-
-          {/* Estado público */}
           {!devAdmin && (
             <>
-              <button
-                className="bg-fb-primary hover:bg-fb-primary-hover text-fb-white font-sans font-medium px-4 py-2 rounded-md transition cursor-pointer"
-                onClick={loginMock}
-              >
-                Iniciar sesión
+              <button className={btnGhost} onClick={loginMock}>
+                <FiLogIn size={18} />
+                <span>Iniciar sesión</span>
               </button>
 
-              <button className="bg-[#42B72A] hover:bg-green-600 text-fb-white font-sans font-medium px-4 py-2 rounded-md transition cursor-pointer">
-                Crear cuenta
+              <button className={btnSuccess}>
+                <HiUserAdd size={18} />
+                <span>Crear cuenta</span>
               </button>
             </>
           )}
 
-          {/* Estado admin */}
           {devAdmin && (
-            <button
-              className="bg-fb-neutral hover:bg-fb-neutral-hover text-fb-black font-sans font-medium px-4 py-2 rounded-md transition cursor-pointer"
-              onClick={logoutMock}
-            >
-              Cerrar sesión
+            <button className={btnDangerGhost} onClick={logoutMock}>
+              <FiLogOut size={18} />
+              <span>Cerrar sesión</span>
             </button>
           )}
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="md:hidden">
+          <div
+            className="fixed inset-0 bg-black/20"
+            onClick={closeMenu}
+            aria-hidden="true"
+          />
+
+          <div className="absolute top-16 sm:top-20 left-0 w-full px-4">
+            <div className="max-w-[96rem] mx-auto">
+              <div className="rounded-2xl border border-fb-stroke bg-fb-surface/95 backdrop-blur shadow-lg p-3">
+                <div className="flex flex-col gap-2">
+                  {devAdmin && (
+                    <>
+                      <NavLink
+                        to="/administracion/producto/nuevo"
+                        onClick={closeMenu}
+                        className={btnPrimary + " w-full rounded-xl py-3"}
+                      >
+                        <HiPlus size={20} />
+                        <span>Publicar</span>
+                      </NavLink>
+
+                      <NavLink
+                        to="/administracion"
+                        onClick={closeMenu}
+                        className={({ isActive }) =>
+                          (isActive ? btnPrimary : btnGhost) +
+                          " w-full rounded-xl py-3"
+                        }
+                      >
+                        <HiCog size={20} />
+                        <span>Administración</span>
+                      </NavLink>
+                    </>
+                  )}
+
+                  {!devAdmin && (
+                    <>
+                      <button onClick={loginMock} className={mobileItem}>
+                        <span className="inline-flex items-center gap-2">
+                          <FiLogIn size={20} />
+                          Iniciar sesión
+                        </span>
+                      </button>
+
+                      <button className={btnSuccess + " w-full rounded-xl py-3"}>
+                        <HiUserAdd size={20} />
+                        <span>Crear cuenta</span>
+                      </button>
+                    </>
+                  )}
+
+                  {devAdmin && (
+                    <button onClick={logoutMock} className={mobileItem}>
+                      <span className="inline-flex items-center gap-2">
+                        <FiLogOut size={20} />
+                        Cerrar sesión
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
