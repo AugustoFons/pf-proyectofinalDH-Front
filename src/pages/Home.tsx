@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "../components/layout/Card";
 import { CardSkeleton } from "../components/layout/CardSkeleton";
 import { Sidebar } from "../components/layout/Sidebar";
@@ -27,6 +27,14 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
   const [reloadTick, setReloadTick] = useState(0); // refrescar al borrar
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const homeRandomRef = useRef<ProductRes[] | null>(null);
+
+  const randomOrder = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
+
+  // Resetear el arreglo random si cambian filtros
+  useEffect(() => {
+    homeRandomRef.current = null;
+  }, [debouncedSearchQuery, selectedCategoryId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -54,7 +62,19 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
       categoryId: selectedCategoryId || undefined
     })
       .then((response: any) => {
-        setPageData(response);
+        const shouldRandomize =
+          currentPageNumber === 0 &&
+          !selectedCategoryId &&
+          !debouncedSearchQuery;
+
+        if (shouldRandomize) {
+          if (!homeRandomRef.current) {
+            homeRandomRef.current = randomOrder(response.content);
+          }
+          setPageData({ ...response, content: homeRandomRef.current });
+        } else {
+          setPageData(response);
+        }
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
@@ -121,7 +141,7 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
 
         <section className="col-span-9">
           <h1 className="font-sans text-xl font-semibold text-fb-text mb-4">
-            { adminMode ? "Lista de Productos" : "Recomendaciones de hoy" }
+            {adminMode ? "Lista de Productos" : "Recomendaciones de hoy"}
           </h1>
 
           {error && <p className="text-red-500">{error}</p>}
