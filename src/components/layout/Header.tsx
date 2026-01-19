@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd } from "react-icons/hi";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { BiAddToQueue } from "react-icons/bi";
 
 export default function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [devAdmin, setDevAdmin] = useState(
     () => localStorage.getItem("devAdmin") === "true"
@@ -25,6 +26,16 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
 
+  const handleAdminClick = (e: any) => {
+    e.preventDefault();
+    if (location.pathname === "/administracion") {
+      navigate("/");
+    } else {
+      navigate("/administracion");
+    }
+    closeMenu();
+  };
+  
   /* ===== Button styles (modern / minimal) ===== */
   const btnBase =
     "inline-flex items-center justify-center gap-2 whitespace-nowrap select-none " +
@@ -94,13 +105,14 @@ export default function Header() {
                 <span>Publicar</span>
               </NavLink>
 
-              <NavLink
-                to="/administracion"
-                className={({ isActive }) => (isActive ? btnPrimary : btnGhost)}
+              <button
+                onClick={handleAdminClick}
+                className={location.pathname === "/administracion" ? btnPrimary : btnGhost}
+                style={{ cursor: "pointer" }}
               >
                 <HiCog size={18} />
                 <span>Administración</span>
-              </NavLink>
+              </button>
             </>
           )}
 
@@ -151,17 +163,16 @@ export default function Header() {
                         <span>Publicar</span>
                       </NavLink>
 
-                      <NavLink
-                        to="/administracion"
-                        onClick={closeMenu}
-                        className={({ isActive }) =>
-                          (isActive ? btnPrimary : btnGhost) +
-                          " w-full rounded-xl py-3"
+                      <button
+                        onClick={handleAdminClick}
+                        className={
+                          (location.pathname === "/administracion" ? btnPrimary : btnGhost) +
+                          " w-full rounded-xl py-3 cursor-pointer"
                         }
                       >
                         <HiCog size={20} />
                         <span>Administración</span>
-                      </NavLink>
+                      </button>
                     </>
                   )}
 

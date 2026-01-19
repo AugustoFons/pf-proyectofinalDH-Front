@@ -1,5 +1,8 @@
 import { NavLink } from "react-router-dom";
 import { productService } from "../../services/productService";
+import { HiPencil, HiTrash } from "react-icons/hi";
+import { PopUp } from "../utils/PopUp";
+import { useState } from "react";
 
 type CardProps = {
   id: number;
@@ -12,6 +15,7 @@ type CardProps = {
 }
 
 export function Card({ id, title, image, price, adminMode = false, onDeleted }: CardProps) {
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,13 +23,7 @@ export function Card({ id, title, image, price, adminMode = false, onDeleted }: 
     window.location.href = `/administracion/producto/${id}/editar`;
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const ok = window.confirm(`¿Eliminar "${title}"?`);
-    if (!ok) return;
-
+  const handleDelete = async () => {
     try {
       await productService.delete(id);
       onDeleted?.();
@@ -35,35 +33,54 @@ export function Card({ id, title, image, price, adminMode = false, onDeleted }: 
   };
 
   return (
-    <NavLink to={`/producto/${id}`}>
-      <article className="relative bg-fb-surface border border-fb-stroke rounded-lg overflow-hidden shadow-sm">
-        {adminMode && (
-          <div className="absolute top-3 right-3 z-10 flex gap-2">
-            <button
-              onClick={handleEdit}
-              className="px-3 py-1.5 rounded-md text-xs font-semibold border border-fb-stroke bg-fb-surface hover:bg-black/5 transition cursor-pointer"
-            >
-              Editar
-            </button>
-            <button
-              onClick={handleDelete}
-              className="px-3 py-1.5 rounded-md text-xs font-semibold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition cursor-pointer"
-            >
-              Eliminar
-            </button>
-          </div>
-        )}
+    <>
+      <NavLink to={`/producto/${id}`}>
+        <article className="relative bg-fb-surface border border-fb-stroke rounded-lg overflow-hidden shadow-sm">
+          {adminMode && (
+            <div className="absolute top-3 right-3 z-10 flex gap-1.5  transition-opacity duration-200">
+              <button
+                onClick={handleEdit}
+                className="p-2 rounded-full bg-white/90 backdrop-blur-sm border border-fb-stroke shadow-sm hover:bg-white hover:border-blue-300 hover:text-fb-primary transition-all cursor-pointer"
+                aria-label="Editar producto"
+              >
+                <HiPencil className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowConfirm(true);
+                }}
+                className="p-2 rounded-full bg-white/90 backdrop-blur-sm border border-fb-stroke shadow-sm hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all cursor-pointer"
+                aria-label="Eliminar producto"
+              >
+                <HiTrash className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
-        <img
-          src={image || "/placeholder.png"}
-          alt={title}
-          className="w-full object-cover h-80"
-        />
-        <div className="p-3">
-          <h2 className="font-sans text-sm font-bold text-fb-text">{title}</h2>
-          <p className="text-fb-text-secondary text-sm">${price?.toFixed(2)}</p>
-        </div>
-      </article>
-    </NavLink>
+          <img
+            src={image || "/placeholder.png"}
+            alt={title}
+            className="w-full object-cover h-80"
+          />
+          <div className="p-3">
+            <h2 className="font-sans text-sm font-bold text-fb-text">{title}</h2>
+            <p className="text-fb-text-secondary text-sm">${price?.toFixed(2)}</p>
+          </div>
+        </article>
+      </NavLink>
+
+      <PopUp
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleDelete}
+        title="¿Eliminar producto?"
+        message={`¿Estás seguro de que deseas eliminar "${title}"? Esta acción no se puede deshacer.`}
+        confirmText="Sí, eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+    </>
   )
 }
