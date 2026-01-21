@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/layout/Footer'
 import AdminProductForm from "./pages/admin/AdminProductForm";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 function App() {
 
@@ -15,9 +16,9 @@ function App() {
           <Routes>
             <Route path='/' element={<Home adminMode={false} />} />
             <Route path="/producto/:id" element={<ProductDetail />} />
-            <Route path='/administracion' element={<Home adminMode={true} />} /> {/* todo: borrar referencias a ruta admin en navbar */}
-            <Route path='/administracion/producto/nuevo' element={<AdminProductForm mode="create" />} />
-            <Route path='/administracion/producto/:id/editar' element={<AdminProductForm mode="edit" />} />
+            <Route path='/administracion' element={<ProtectedRoute><Home adminMode={true} /></ProtectedRoute>} />
+            <Route path='/administracion/producto/nuevo' element={<ProtectedRoute><AdminProductForm mode="create" /></ProtectedRoute>} />
+            <Route path='/administracion/producto/:id/editar' element={<ProtectedRoute><AdminProductForm mode="edit" /></ProtectedRoute>} />
           </Routes>
         </main>
         <Footer />
