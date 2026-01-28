@@ -12,7 +12,6 @@ export default function ProductDetail() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAllThumbnails, setShowAllThumbnails] = useState(false);
 
-  console.log("Product ID:", product);
 
   useEffect(() => {
     setLoading(true);

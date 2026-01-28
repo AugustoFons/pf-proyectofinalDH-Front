@@ -7,7 +7,7 @@ async function request<T>(path: string, options: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    const msg = body?.error || body?.message || `${res.status} ${res.statusText}`;
+    const msg = body?.message || body?.error || `${res.status} ${res.statusText}`;
     throw new Error(msg);
   }
   return res.json();

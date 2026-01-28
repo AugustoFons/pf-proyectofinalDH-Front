@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { categoryService, type CategoryRes } from "../../services/categoryService";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import '../../styles/scrollbars.css';
 
 type SidebarProps = {
   searchQuery: string;
@@ -68,40 +69,6 @@ export const Sidebar = ({ searchQuery, onSearchChange, selectedCategoryId, onCat
 
   return (
     <>
-      {/* Estilos del scrollbar */}
-      <style>{`
-        .modern-scrollbar::-webkit-scrollbar {
-          width: 6px; 
-        }
-        .modern-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .modern-scrollbar::-webkit-scrollbar-thumb {
-          background-color: #d1d5db;
-          border-radius: 20px;
-          border: 1px solid transparent; 
-          background-clip: content-box;
-        }
-        .modern-scrollbar::-webkit-scrollbar-thumb:hover {
-          background-color: #9ca3af;
-        }
-        .modern-scrollbar::-webkit-scrollbar-button {
-          display: block !important;
-          height: 3px !important;
-          width: 6px; 
-          background-color: transparent;
-        }
-
-        /* Ocultar scrollbar en móvil para scroll horizontal */
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
-
       {/* VISTA MÓVIL - Buscador + Categorías Horizontales */}
       <div className="lg:hidden col-span-full space-y-3">
         <div className="px-0">

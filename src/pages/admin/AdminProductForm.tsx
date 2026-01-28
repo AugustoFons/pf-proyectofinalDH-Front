@@ -7,8 +7,6 @@ import { TbArrowLeft } from "react-icons/tb";
 
 type Props = { mode: "create" | "edit" };
 
-//type Category = { id: number; name: string };
-
 export default function AdminProductForm({ mode }: Props) {
   const { id } = useParams();
   const navigate = useNavigate();
