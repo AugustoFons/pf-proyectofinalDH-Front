@@ -5,11 +5,13 @@ import ProductDetail from './pages/ProductDetail'
 import Footer from './components/layout/Footer'
 import AdminProductForm from "./pages/admin/AdminProductForm";
 import ProtectedRoute from "./auth/ProtectedRoute";
+import ScrollToTop from "./components/utils/ScrollToTop";
 
 function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <div className="font-sans">
         <Header />
         <main className='py-14 bg-fb-background min-h-screen'>

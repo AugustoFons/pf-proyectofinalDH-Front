@@ -11,7 +11,7 @@ type CardProps = {
   description?: string;
   price?: number;
   adminMode?: boolean;
-  onDeleted?: () => void;
+  onDeleted?: (id: number) => void;
 }
 
 export function Card({ id, title, image, price, adminMode = false, onDeleted }: CardProps) {
@@ -26,7 +26,7 @@ export function Card({ id, title, image, price, adminMode = false, onDeleted }: 
   const handleDelete = async () => {
     try {
       await productService.delete(id);
-      onDeleted?.();
+      onDeleted?.(id);
     } catch (err: any) {
       alert(err?.message ?? "No se pudo eliminar");
     }

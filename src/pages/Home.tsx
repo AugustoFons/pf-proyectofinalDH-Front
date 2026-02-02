@@ -96,6 +96,14 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
     setCurrentPageNumber(pageNumber);
   };
 
+  const handleDeleted = (id: number) => {
+    setPageData(prev =>
+      prev ? { ...prev, content: prev.content.filter(p => p.id !== id) } : prev
+    );
+    homeRandomRef.current = null;
+    setReloadTick(t => t + 1);
+  };
+
   // Generar números de página para mostrar
   const getPageNumbers = () => {
     if (!pageData) return [];
@@ -159,7 +167,7 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
                   description={p.description}
                   price={p.price}
                   adminMode={adminMode}
-                  onDeleted={() => setReloadTick((t) => t + 1)}
+                  onDeleted={handleDeleted}
                 />
               ))
             )}
