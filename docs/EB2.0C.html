@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience Builder Pro - Modern Navigation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Estilos para los items de navegación en el Header */
+        .nav-header-item { 
+            transition: all 0.2s ease; 
+            position: relative; 
+            color: #94a3b8; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 1rem;
+            height: 100%;
+            cursor: pointer;
+        }
+        .nav-header-item:hover { color: #64748b; background-color: #f8fafc; }
+        .nav-header-item.active { color: #2563eb; background-color: #eff6ff; }
+        .nav-header-item.active::after {
+            content: ''; 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            height: 3px;
+            background-color: #2563eb;
+        }
+
+        .sidebar-tab.active { color: #2563eb; border-bottom: 2px solid #2563eb; background-color: white; }
+        
+        #pages-dropdown { display: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        #pages-dropdown.show { display: block; }
+
+        .nav-item-active { background-color: #eff6ff; color: #1d4ed8; font-weight: 600; border-right: 3px solid #1d4ed8; }
+        
+        .component-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+        .code-editor { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-700 h-screen flex flex-col overflow-hidden">
+
+    <!-- --- HEADER (Navegación Integrada) --- -->
+    <header class="bg-white border-b border-slate-200 h-14 flex items-center justify-between px-4 shrink-0 z-50">
+        <div class="flex items-center h-full gap-4">
+            <div class="flex items-center shrink-0">
+                <span class="font-bold text-slate-400 text-xl tracking-tight italic select-none">eb</span>
+                <div class="h-6 w-[1px] bg-slate-200 mx-4"></div>
+                
+                <!-- Breadcrumb -->
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="text-slate-400 font-medium hover:text-slate-600 cursor-pointer transition">ejemplo_simple</span>
+                    <span class="text-slate-300">/</span>
+                    <div class="relative">
+                        <button onclick="toggleDropdown(event)" class="flex items-center gap-2 font-bold text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-md transition border border-transparent hover:border-slate-100">
+                            <span id="header-page-name">Dashboard Principal</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                        </button>
+                        
+                        <div id="pages-dropdown" class="absolute left-0 mt-2 w-72 bg-white border border-slate-200 rounded-lg py-2 z-[60]">
+                            <div class="px-4 py-2 border-b border-slate-50 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                <span>Páginas</span>
+                                <span id="pages-count">2</span>
+                            </div>
+                            <div id="pages-list-container" class="max-h-64 overflow-y-auto custom-scrollbar"></div>
+                            <div class="border-t border-slate-100 mt-1 pt-1">
+                                <button onclick="handleAddNewPage()" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-blue-600 font-bold hover:bg-blue-50 transition">
+                                    <i data-lucide="plus" class="w-4 h-4"></i> Add new page
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAVEGACIÓN PRINCIPAL (NUEVO: Arriba) -->
+            <nav class="flex items-center h-full ml-4">
+                <div id="nav-management" onclick="setContext('management')" class="nav-header-item transition" title="Gestión">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider hidden lg:block">Gestión</span>
+                </div>
+                <div id="nav-designer" onclick="setContext('designer')" class="nav-header-item active transition" title="Diseñador">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider hidden lg:block">Diseño</span>
+                </div>
+                <div id="nav-resources" onclick="setContext('resources')" class="nav-header-item transition" title="Recursos">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider hidden lg:block">Recursos</span>
+                </div>
+            </nav>
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="flex items-center gap-2">
+            <button class="bg-[#00697d] hover:bg-[#005a6b] text-white px-4 py-1.5 rounded text-xs font-semibold shadow-sm flex items-center gap-2 transition-all active:scale-95">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Enviar a revisión
+            </button>
+            <button class="p-1.5 bg-[#00697d] rounded text-white shadow-sm hover:brightness-110 transition-all"><i data-lucide="save" class="w-4 h-4"></i></button>
+            <button class="p-1.5 border border-blue-500 rounded text-blue-500 hover:bg-blue-50 transition-all"><i data-lucide="eye" class="w-4 h-4"></i></button>
+            <button class="p-1.5 bg-red-700 rounded text-white shadow-sm hover:brightness-110 transition-all"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <div class="w-8 h-8 ml-2 rounded-full bg-[#00697d] flex items-center justify-center text-white font-bold text-[10px] shadow-sm cursor-pointer border border-slate-100">PP</div>
+        </div>
+    </header>
+
+    <!-- --- CUERPO PRINCIPAL --- -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- SIDEBAR IZQUIERDO (Sigue abriéndose al costado) -->
+        <aside id="sidebar-explorer" class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0 overflow-hidden shadow-[2px_0_5px_rgba(0,0,0,0.01)]">
+            <!-- Contenido dinámico según selección del header -->
+        </aside>
+
+        <!-- CANVAS CENTRAL -->
+        <div class="flex-1 bg-[#f1f5f9] p-6 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+            <div id="canvas-area" class="flex-1 bg-white border border-slate-200 rounded-2xl relative min-h-[600px] shadow-sm overflow-hidden flex flex-col">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+
+        <!-- PANEL DE PROPIEDADES (Derecho) -->
+        <aside id="right-config-panel" class="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 transition-all">
+            <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Propiedades</h2>
+                <i data-lucide="help-circle" class="w-4 h-4 text-slate-300"></i>
+            </div>
+            <div class="p-5 flex-1 overflow-y-auto custom-scrollbar space-y-8" id="config-content">
+                <div class="text-center p-10 text-slate-300 text-xs italic">Selecciona un elemento para editar sus propiedades.</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="h-10 bg-white border-t border-slate-200 flex items-center px-4 justify-between shrink-0 z-20">
+        <div class="flex items-center gap-4 text-slate-400">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Engine Ready</span>
+            </div>
+            <div class="h-4 w-[1px] bg-slate-200"></div>
+            <span id="footer-status" class="text-[10px] font-medium italic">No queries running</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <i data-lucide="monitor" class="w-3.5 h-3.5 text-blue-500"></i>
+            <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest tracking-tighter">v0.1.0-beta</span>
+        </div>
+    </footer>
+
+    <script>
+        const state = {
+            project: { name: "ejemplo_simple", uuid: "d81fb246-a655-4185-b64a-37ac545927de" },
+            pages: [
+                { id: 'p1', name: 'Dashboard Principal', type: 'dashboard', icon: 'layout-dashboard' },
+                { id: 'p2', name: 'Gestión de Clientes', type: 'table', icon: 'users' }
+            ],
+            activePageId: 'p1',
+            context: 'designer', 
+            subView: 'Components',
+            selectedQueryId: null,
+            dropdownVisible: false,
+            queries: [
+                { id: 'q1', name: 'getOrders', type: 'SQL', resource: 'PostgreSQL_Main', code: 'SELECT * FROM tour_orders;' },
+                { id: 'q2', name: 'updateCustomer', type: 'API', resource: 'Stripe_API', code: 'POST /v1/customers/{{id}}' }
+            ]
+        };
+
+        const navConfigs = {
+            management: [
+                { id: 'Configuración', icon: 'settings' },
+                { id: 'Comentarios', icon: 'message-square' },
+                { id: 'Log Auditoría', icon: 'clipboard-list' },
+                { id: 'Historial de Versiones', icon: 'history' }
+            ],
+            designer: [
+                { id: 'Components', icon: 'grid', label: 'Componentes' },
+                { id: 'Modules', icon: 'package', label: 'Módulos' }
+            ],
+            resources: [
+                { id: 'Conexiones', icon: 'database' },
+                { id: 'Consultas', icon: 'code-2', label: 'Consultas (Queries)' },
+                { id: 'Flujos', icon: 'zap', label: 'Flujos de Pantalla' },
+                { id: 'Imágenes', icon: 'image' }
+            ]
+        };
+
+        const fullLibrary = [
+            { category: 'Input', items: [{ id: 'text', label: 'Text', icon: 'type' }, { id: 'textarea', label: 'Text area', icon: 'align-left' }, { id: 'datetime', label: 'Date Time', icon: 'calendar' }, { id: 'filepicker', label: 'File Picker', icon: 'file-up' }] },
+            { category: 'Selection', items: [{ id: 'select', label: 'Select', icon: 'chevron-down' }, { id: 'buscador', label: 'Buscador', icon: 'search' }, { id: 'checkbox', label: 'Checkbox', icon: 'check-square' }, { id: 'radio', label: 'Radio', icon: 'circle-dot' }] },
+            { category: 'Presentation', items: [{ id: 'image', label: 'Image', icon: 'image' }, { id: 'divider', label: 'Divider', icon: 'minus' }, { id: 'social', label: 'Social', icon: 'share-2' }, { id: 'textview', label: 'Text view', icon: 'type' }, { id: 'htmlview', label: 'HTML view', icon: 'code' }, { id: 'carousel', label: 'Carousel', icon: 'gallery-horizontal' }] }
+        ];
+
+        function setContext(ctx, sub = null) {
+            state.context = ctx;
+            if (!sub) {
+                if (ctx === 'management') state.subView = 'Configuración';
+                if (ctx === 'designer') state.subView = 'Components';
+                if (ctx === 'resources') state.subView = 'Conexiones';
+            } else {
+                state.subView = sub;
+            }
+
+            // Actualizar estado activo en el Header
+            document.querySelectorAll('.nav-header-item').forEach(el => el.classList.remove('active'));
+            const navEl = document.getElementById(`nav-${ctx}`);
+            if (navEl) navEl.classList.add('active');
+
+            const configPanel = document.getElementById('right-config-panel');
+            if (configPanel) configPanel.classList.toggle('hidden', state.context !== 'designer');
+
+            renderSidebar();
+            renderCanvas();
+            lucide.createIcons();
+        }
+
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar-explorer');
+            const items = navConfigs[state.context];
+            if (!sidebar || !items) return;
+            
+            sidebar.innerHTML = `
+                <div class="p-6 border-b border-slate-100 bg-slate-50/30">
+                    <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+                        ${state.context === 'management' ? 'Gestión de Proyecto' : state.context === 'designer' ? 'Diseño de App' : 'Datos y Lógica'}
+                    </h3>
+                    <div class="space-y-1">
+                        ${items.map(item => `
+                            <div onclick="setContext('${state.context}', '${item.id}')" 
+                                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all 
+                                 ${state.subView === item.id ? 'nav-item-active' : 'text-slate-600 hover:bg-slate-50'}">
+                                <i data-lucide="${item.icon}" class="w-4 h-4"></i>
+                                <span>${item.label || item.id}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ${state.context === 'designer' ? `
+                    <div class="p-4 flex-1 overflow-y-auto custom-scrollbar">
+                        <div class="relative mb-6">
+                            <input type="text" placeholder="Buscar componente..." class="w-full text-xs border border-slate-200 rounded-lg px-9 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-300"></i>
+                        </div>
+                        ${state.subView === 'Components' ? renderFullLibrary() : renderModulesLibrary()}
+                    </div>
+                ` : ''}
+            `;
+            lucide.createIcons();
+        }
+
+        function renderFullLibrary() {
+            return fullLibrary.map(cat => `
+                <div class="mb-8">
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">${cat.category}</h4>
+                    <div class="component-grid">
+                        ${cat.items.map(item => `
+                            <div class="flex flex-col items-center justify-center p-3 border border-slate-100 rounded-xl bg-white text-center hover:border-blue-400 hover:shadow-md cursor-grab transition-all group">
+                                <div class="w-8 h-8 flex items-center justify-center mb-1 text-slate-400 group-hover:text-blue-500 transition-colors">
+                                    <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-600 group-hover:text-blue-600">${item.label}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderModulesLibrary() {
+            return `<div class="p-4 border border-blue-100 rounded-xl bg-blue-50/20 group cursor-pointer hover:border-blue-300 transition-all shadow-sm"><div class="flex items-center gap-3 mb-2"><div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-500"><i data-lucide="package" class="w-4 h-4"></i></div><p class="text-[11px] font-bold text-blue-700">modulePaul</p></div><p class="text-[9px] text-blue-400 italic">Custom Analytics Module</p></div>`;
+        }
+
+        function renderCanvas() {
+            const canvas = document.getElementById('canvas-area');
+            const page = state.pages.find(p => p.id === state.activePageId);
+            if (!canvas) return;
+            
+            if (state.context === 'designer') {
+                canvas.innerHTML = `
+                    <div class="p-8 h-full flex flex-col gap-6 animate-in fade-in duration-300">
+                        <div class="flex justify-between items-end border-b pb-4">
+                            <div><h2 class="text-3xl font-black text-slate-800 tracking-tight">${page ? page.name : ''}</h2><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Lienzo de Diseño</p></div>
+                            <div class="flex gap-2 bg-slate-100 p-1 rounded-lg">
+                                <button class="px-4 py-1.5 text-[10px] font-bold bg-white shadow-sm text-blue-600 rounded-md">Escritorio</button>
+                                <button class="px-4 py-1.5 text-[10px] font-bold text-slate-500 hover:text-slate-800 rounded-md transition-colors">Móvil</button>
+                            </div>
+                        </div>
+                        <div class="border-2 border-dashed border-slate-200 rounded-2xl flex-1 flex flex-col items-center justify-center text-slate-300 italic bg-slate-50/50">
+                             <i data-lucide="layout" class="w-12 h-12 mb-4 text-blue-50"></i>
+                             <p>Arrastra componentes desde la izquierda</p>
+                        </div>
+                    </div>`;
+            } else if (state.subView === 'Flujos') {
+                canvas.innerHTML = `
+                    <div class="flex h-full animate-in fade-in duration-300">
+                        <div class="flex-1 flex flex-col p-8 gap-6 border-r overflow-y-auto custom-scrollbar bg-white">
+                            <div class="flex justify-between items-center"><h2 class="text-xl font-bold">Lógica de Flujos</h2><button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md">Guardar Flujo</button></div>
+                            <div class="space-y-6">
+                                ${['PRE LOAD', 'PRE SAVE', 'POST SAVE'].map(label => `
+                                    <div class="flex flex-col border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                                        <div class="p-3 border-b bg-slate-50 flex items-center justify-between"><span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">${label}</span><i data-lucide="code" class="w-3.5 h-3.5 text-slate-300"></i></div>
+                                        <div class="p-4 flex font-mono text-xs gap-4 bg-white min-h-[150px]">
+                                            <div class="text-slate-200 select-none border-r pr-3">1<br>2<br>3<br>4</div>
+                                            <div class="flex-1 outline-none text-blue-600" contenteditable="true">// Escribe la lógica del flujo...</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="w-72 bg-slate-50 p-6 shrink-0 flex flex-col gap-6 shadow-inner">
+                            <div><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Pantallas Asignadas</h3><div class="space-y-2">
+                                ${state.pages.map(p => `
+                                    <label class="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-blue-400 transition-all shadow-sm">
+                                        <input type="checkbox" class="rounded text-blue-600 focus:ring-0" checked>
+                                        <span class="text-xs font-medium text-slate-600">${p.name}</span>
+                                    </label>
+                                `).join('')}
+                            </div></div>
+                        </div>
+                    </div>`;
+            } else if (state.subView === 'Consultas') {
+                canvas.innerHTML = `
+                    <div class="flex h-full animate-in fade-in duration-300">
+                        <div class="w-80 border-r border-slate-100 flex flex-col bg-white">
+                            <div class="p-4 border-b flex justify-between items-center bg-slate-50/30">
+                                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lista de Consultas</h3>
+                                <button class="p-1 text-blue-600 hover:bg-blue-50 rounded transition"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                            </div>
+                            <div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                                ${state.queries.map(q => `<div onclick="selectQuery('${q.id}')" class="p-3 rounded-xl cursor-pointer transition-all flex items-center justify-between group ${state.selectedQueryId === q.id ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-slate-50'}"><div class="flex items-center gap-3"><i data-lucide="${q.type === 'SQL' ? 'database' : 'globe'}" class="w-4 h-4"></i><div><p class="text-xs font-bold mb-1">${q.name}</p><p class="text-[9px] uppercase opacity-70">${q.type}</p></div></div><i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100"></i></div>`).join('')}
+                            </div>
+                        </div>
+                        <div class="flex-1 flex flex-col bg-white">
+                            ${state.selectedQueryId ? renderQueryEditor() : `<div class="flex-1 flex flex-col items-center justify-center text-center p-12"><div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6 text-blue-200"><i data-lucide="code-2" class="w-10 h-10"></i></div><h3 class="text-lg font-bold text-slate-800">Editor de Consultas</h3></div>`}
+                        </div>
+                    </div>`;
+            } else if (state.subView === 'Imágenes') {
+                canvas.innerHTML = `<div class="p-8 h-full flex flex-col gap-6 animate-in slide-in-from-bottom-2 duration-300"><h2 class="text-xl font-bold">Contenedor de Imágenes</h2><div class="border-2 border-dashed border-slate-200 rounded-2xl p-12 flex flex-col items-center justify-center bg-slate-50/30 text-slate-400 group cursor-pointer hover:border-blue-300 transition-all"><i data-lucide="upload-cloud" class="w-10 h-10 mb-2"></i><p class="text-sm font-bold">Haz clic para cargar imágenes</p></div><div class="grid grid-cols-6 gap-4">${[1,2,3].map(i => `<div class="aspect-square bg-slate-100 rounded-2xl border border-slate-200 relative group overflow-hidden shadow-sm"><div class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-300 uppercase font-black">Asset ${i}</div></div>`).join('')}</div></div>`;
+            } else if (state.context === 'management') {
+                renderManagementCanvas(canvas);
+            } else {
+                canvas.innerHTML = `<div class="p-20 text-center text-slate-300 italic">Vista de ${state.subView}</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        function renderQueryEditor() {
+            const query = state.queries.find(q => q.id === state.selectedQueryId);
+            return `
+                <div class="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">
+                    <div class="p-6 border-b flex justify-between items-center bg-slate-50/30">
+                        <div class="flex items-center gap-4"><input type="text" value="${query.name}" class="text-lg font-bold text-slate-800 bg-transparent outline-none border-b-2 border-transparent focus:border-blue-500 px-1 py-0.5"><div class="flex gap-1 bg-white border rounded-lg p-0.5 shadow-sm"><button class="px-3 py-1 text-[10px] font-black bg-blue-600 text-white rounded-md uppercase">SQL</button><button class="px-3 py-1 text-[10px] font-black text-slate-400 rounded-md uppercase">GUI</button></div></div>
+                        <div class="flex gap-2"><button class="px-5 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-blue-700 active:scale-95 transition">Run Query</button></div>
+                    </div>
+                    <div class="p-8 flex-1 overflow-y-auto custom-scrollbar space-y-6">
+                        <div class="flex flex-col border rounded-2xl overflow-hidden bg-slate-50 h-[300px] shadow-inner">
+                            <div class="p-3 border-b flex justify-between bg-slate-50 items-center"><span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Query Content</span></div>
+                            <div class="flex-1 p-6 font-mono text-sm bg-white outline-none code-editor text-blue-700 whitespace-pre" contenteditable="true">${query.code}</div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function selectQuery(id) {
+            state.selectedQueryId = id;
+            renderCanvas();
+        }
+
+        function renderManagementCanvas(container) {
+            const sub = state.subView;
+            if (sub === 'Configuración') {
+                container.innerHTML = `<div class="p-10 max-w-4xl mx-auto space-y-8 animate-in fade-in"><h2 class="text-2xl font-black border-b pb-6 text-[#00697d] tracking-tight">Configuración del Proyecto</h2><div class="grid grid-cols-2 gap-10">${['Descripción', 'Tipo de Portal', 'URL Form', 'UUID'].map(l => `<div class="space-y-2"><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${l}</label><div class="border-b border-slate-100 py-3 text-sm text-slate-500 italic font-medium">Automático / Sin asignar</div></div>`).join('')}</div></div>`;
+            } else if (sub === 'Log Auditoría') {
+                container.innerHTML = `<div class="p-8 space-y-6 h-full flex flex-col"><h2 class="text-xl font-bold">Log de Auditoría</h2><div class="border rounded-2xl bg-white flex-1 overflow-auto shadow-sm"><table class="w-full text-xs text-left"><thead class="bg-slate-50 sticky top-0"><tr><th class="p-4 font-black text-slate-400 uppercase tracking-tighter">Fecha</th><th class="p-4 font-black text-slate-400 uppercase tracking-tighter">Actividad</th><th class="p-4 font-black text-slate-400 uppercase tracking-tighter">Usuario</th></tr></thead><tbody class="divide-y">${[1,2,3].map(i => `<tr><td class="p-4 text-slate-400 italic">18/12/2025</td><td class="p-4 font-bold">Modificación de lógica</td><td class="p-4">Jimmy Alan</td></tr>`).join('')}</tbody></table></div></div>`;
+            } else if (sub === 'Comentarios') {
+                container.innerHTML = `<div class="p-10 h-full flex flex-col gap-6"><h2 class="text-xl font-bold text-[#00697d]">Redacta un comentario</h2><div class="border-2 border-slate-100 rounded-2xl bg-white shadow-sm flex-1 p-6"><textarea class="w-full h-full resize-none outline-none text-sm text-slate-600 font-medium" placeholder="Describe aquí tus observaciones..."></textarea></div><button class="ml-auto bg-[#00697d] text-white px-8 py-2.5 rounded-xl font-bold shadow-lg hover:bg-[#005a6b] transition-all">Agregar comentario</button></div>`;
+            } else if (sub === 'Historial de Versiones') {
+                container.innerHTML = `<div class="p-8 h-full space-y-6"><h2 class="text-xl font-bold text-blue-800 tracking-tight">Historial de Versiones</h2><div class="p-6 border border-blue-100 rounded-2xl bg-blue-50/30 flex items-center justify-between"><div class="flex items-center gap-6"><span class="font-mono font-black text-blue-600 bg-white px-3 py-1 rounded-lg border border-blue-100 shadow-sm">0.1</span><div class="text-sm font-medium">Versión inicial</div></div><button class="text-blue-600 font-bold text-xs hover:underline transition-all">Restaurar</button></div></div>`;
+            }
+        }
+
+        // --- UTILS ---
+        function toggleDropdown(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            state.dropdownVisible = !state.dropdownVisible;
+            const dropdown = document.getElementById('pages-dropdown');
+            if (dropdown) dropdown.classList.toggle('show', state.dropdownVisible);
+            if (state.dropdownVisible) renderPagesDropdown();
+        }
+
+        function renderPagesDropdown() {
+            const container = document.getElementById('pages-list-container');
+            if (!container) return;
+            container.innerHTML = state.pages.map(p => `
+                <div onclick="switchPage('${p.id}')" class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer group transition-all">
+                    <div class="flex items-center gap-3"><i data-lucide="${p.icon}" class="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors"></i><span class="text-sm ${state.activePageId === p.id ? 'font-black text-blue-600' : 'text-slate-600 font-medium'}">${p.name}</span></div>
+                    ${state.activePageId === p.id ? '<i data-lucide="check" class="w-4 h-4 text-blue-600"></i>' : ''}
+                </div>`).join('');
+            lucide.createIcons();
+        }
+
+        function switchPage(id) {
+            state.activePageId = id;
+            state.dropdownVisible = false;
+            const dropdown = document.getElementById('pages-dropdown');
+            if (dropdown) dropdown.classList.remove('show');
+            const page = state.pages.find(p => p.id === id);
+            const headerPageName = document.getElementById('header-page-name');
+            if (headerPageName && page) headerPageName.innerText = page.name;
+            setContext('designer');
+        }
+
+        function handleAddNewPage() {
+            const name = prompt("Nombre de la nueva pantalla:");
+            if (name) {
+                const id = 'p' + Date.now();
+                state.pages.push({ id, name, type: 'empty', icon: 'file' });
+                switchPage(id);
+            }
+        }
+
+        window.onclick = function(event) {
+            if (state.dropdownVisible) {
+                const dropdown = document.getElementById('pages-dropdown');
+                const dropdownButton = document.querySelector('[onclick="toggleDropdown(event)"]');
+                if (dropdown && !dropdown.contains(event.target) && !dropdownButton.contains(event.target)) {
+                    toggleDropdown();
+                }
+            }
+        };
+
+        window.onload = () => setContext('designer');
+
+    </script>
+</body>
+</html>
