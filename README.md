@@ -37,3 +37,9 @@ Repositorio Backend:
 https://github.com/AugustoFons/pf-proyectofinalDH-Backend
 
 ---
+
+A continuación se deja el enlace a un breve video donde se muestra como se inicializan las tablas por primera vez, la inserción de datos y una vista general de las pantallas. Es necesario previamente haber realizado los pasos previos de instalación mencionados en cada repositorio.
+
+https://drive.google.com/file/d/1kD3_EGqhuRWitlL_h6k0wXQv9cJ-cd5t/view?usp=sharing
+
+---
