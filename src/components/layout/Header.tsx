@@ -4,28 +4,31 @@ import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd } from "react-icons/hi";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { BiAddToQueue } from "react-icons/bi";
 import { btnPrimary, btnGhost, btnSuccess, btnDangerGhost, mobileItem } from "../../styles/headerButtons";
+import { useAuth } from "../../auth/AuthContext";
 
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [devAdmin, setDevAdmin] = useState(
-    () => localStorage.getItem("devAdmin") === "true"
-  );
-
-  const loginMock = () => {
-    localStorage.setItem("devAdmin", "true");
-    setDevAdmin(true);
-  };
-
-  const logoutMock = () => {
-    localStorage.removeItem("devAdmin");
-    setDevAdmin(false);
-    navigate("/");
-  };
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
+
+  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
+  const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase() || "U";
+
+  const goToAuth = (tab: "login" | "register") => {
+    navigate("/acceso", { state: { tab } });
+    closeMenu();
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
+    closeMenu();
+    navigate("/");
+  };
 
   const handleAdminClick = (e: any) => {
     e.preventDefault();
@@ -61,7 +64,7 @@ export default function Header() {
 
         {/* Desktop buttons */}
         <div className="hidden md:flex gap-3 relative -top-0.5">
-          {devAdmin && (
+          {isAdmin && (
             <>
               <NavLink to="/administracion/producto/nuevo" className={btnPrimary}>
                 <BiAddToQueue size={18} />
@@ -79,25 +82,45 @@ export default function Header() {
             </>
           )}
 
-          {!devAdmin && (
+          {!isAuthenticated && (
             <>
-              <button className={btnGhost} onClick={loginMock}>
+              <button className={btnGhost} onClick={() => goToAuth("login")}>
                 <FiLogIn size={18} />
                 <span>Iniciar sesión</span>
               </button>
 
-              <button className={btnSuccess}>
+              <button className={btnSuccess} onClick={() => goToAuth("register")}>
                 <HiUserAdd size={18} />
                 <span>Crear cuenta</span>
               </button>
             </>
           )}
 
-          {devAdmin && (
-            <button className={btnDangerGhost} onClick={logoutMock}>
-              <FiLogOut size={18} />
-              <span>Cerrar sesión</span>
-            </button>
+          {isAuthenticated && user && (
+            <div className="relative">
+              <button
+                className="inline-flex items-center gap-3 rounded-full border border-fb-stroke bg-fb-surface px-3 py-1.5 hover:bg-fb-neutral transition cursor-pointer"
+                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+              >
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-fb-primary text-fb-white text-sm font-semibold">
+                  {initials}
+                </span>
+                <span className="text-sm font-medium text-fb-text">{fullName}</span>
+              </button>
+
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-xl border border-fb-stroke bg-fb-surface p-2 shadow-lg">
+                  <div className="mb-1 rounded-lg bg-fb-neutral px-3 py-2">
+                    <p className="text-sm font-semibold text-fb-text leading-tight">{fullName}</p>
+                    <p className="text-xs text-fb-text-secondary truncate">{user.email}</p>
+                  </div>
+                  <button className={`${btnDangerGhost} w-full justify-start rounded-lg`} onClick={handleLogout}>
+                    <FiLogOut size={18} />
+                    <span>Cerrar sesión</span>
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -115,7 +138,7 @@ export default function Header() {
             <div className="max-w-[96rem] mx-auto">
               <div className="rounded-2xl border border-fb-stroke bg-fb-surface/95 backdrop-blur shadow-lg p-3">
                 <div className="flex flex-col gap-2">
-                  {devAdmin && (
+                  {isAdmin && (
                     <>
                       <NavLink
                         to="/administracion/producto/nuevo"
@@ -139,29 +162,40 @@ export default function Header() {
                     </>
                   )}
 
-                  {!devAdmin && (
+                  {!isAuthenticated && (
                     <>
-                      <button onClick={loginMock} className={mobileItem}>
+                      <button onClick={() => goToAuth("login")} className={mobileItem}>
                         <span className="inline-flex items-center gap-2">
                           <FiLogIn size={20} />
                           Iniciar sesión
                         </span>
                       </button>
 
-                      <button className={btnSuccess + " w-full rounded-xl py-3"}>
+                      <button onClick={() => goToAuth("register")} className={btnSuccess + " w-full rounded-xl py-3"}>
                         <HiUserAdd size={20} />
                         <span>Crear cuenta</span>
                       </button>
                     </>
                   )}
 
-                  {devAdmin && (
-                    <button onClick={logoutMock} className={mobileItem}>
-                      <span className="inline-flex items-center gap-2">
-                        <FiLogOut size={20} />
-                        Cerrar sesión
-                      </span>
-                    </button>
+                  {isAuthenticated && user && (
+                    <div className="rounded-xl border border-fb-stroke bg-fb-surface p-2">
+                      <div className="flex items-center gap-3 px-2 py-2">
+                        <span className="grid h-9 w-9 place-items-center rounded-full bg-fb-primary text-fb-white text-sm font-semibold">
+                          {initials}
+                        </span>
+                        <div>
+                          <p className="text-sm font-semibold text-fb-text leading-tight">{fullName}</p>
+                          <p className="text-xs text-fb-text-secondary truncate">{user.email}</p>
+                        </div>
+                      </div>
+                      <button onClick={handleLogout} className={mobileItem}>
+                        <span className="inline-flex items-center gap-2">
+                          <FiLogOut size={20} />
+                          Cerrar sesión
+                        </span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
