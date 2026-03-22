@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd } from "react-icons/hi";
+import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd, HiUsers } from "react-icons/hi";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { BiAddToQueue } from "react-icons/bi";
 import { btnPrimary, btnGhost, btnSuccess, btnDangerGhost, mobileItem } from "../../styles/headerButtons";
@@ -17,6 +17,7 @@ export default function Header() {
 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
   const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase() || "U";
+  const isUsersSection = location.pathname.startsWith("/administracion/usuarios");
 
   const goToAuth = (tab: "login" | "register") => {
     navigate("/acceso", { state: { tab } });
@@ -28,6 +29,12 @@ export default function Header() {
     setIsUserMenuOpen(false);
     closeMenu();
     navigate("/");
+  };
+
+  const goToProfile = () => {
+    setIsUserMenuOpen(false);
+    closeMenu();
+    navigate("/perfil");
   };
 
   const handleAdminClick = (e: any) => {
@@ -79,6 +86,11 @@ export default function Header() {
                 <HiCog size={18} />
                 <span>Administración</span>
               </button>
+
+              <NavLink to="/administracion/usuarios" className={isUsersSection ? btnPrimary : btnGhost}>
+                <HiUsers size={18} />
+                <span>Usuarios</span>
+              </NavLink>
             </>
           )}
 
@@ -110,10 +122,14 @@ export default function Header() {
 
               {isUserMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-xl border border-fb-stroke bg-fb-surface p-2 shadow-lg">
-                  <div className="mb-1 rounded-lg bg-fb-neutral px-3 py-2">
+                  <button
+                    type="button"
+                    onClick={goToProfile}
+                    className="mb-1 w-full rounded-lg bg-fb-neutral px-3 py-2 text-left hover:bg-fb-neutral/80 transition cursor-pointer"
+                  >
                     <p className="text-sm font-semibold text-fb-text leading-tight">{fullName}</p>
                     <p className="text-xs text-fb-text-secondary truncate">{user.email}</p>
-                  </div>
+                  </button>
                   <button className={`${btnDangerGhost} w-full justify-start rounded-lg`} onClick={handleLogout}>
                     <FiLogOut size={18} />
                     <span>Cerrar sesión</span>
@@ -159,6 +175,15 @@ export default function Header() {
                         <HiCog size={20} />
                         <span>Administración</span>
                       </button>
+
+                      <NavLink
+                        to="/administracion/usuarios"
+                        onClick={closeMenu}
+                        className={(isUsersSection ? btnPrimary : btnGhost) + " w-full rounded-xl py-3"}
+                      >
+                        <HiUsers size={20} />
+                        <span>Usuarios</span>
+                      </NavLink>
                     </>
                   )}
 
@@ -180,7 +205,11 @@ export default function Header() {
 
                   {isAuthenticated && user && (
                     <div className="rounded-xl border border-fb-stroke bg-fb-surface p-2">
-                      <div className="flex items-center gap-3 px-2 py-2">
+                      <button
+                        type="button"
+                        onClick={goToProfile}
+                        className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-fb-neutral transition cursor-pointer"
+                      >
                         <span className="grid h-9 w-9 place-items-center rounded-full bg-fb-primary text-fb-white text-sm font-semibold">
                           {initials}
                         </span>
@@ -188,7 +217,7 @@ export default function Header() {
                           <p className="text-sm font-semibold text-fb-text leading-tight">{fullName}</p>
                           <p className="text-xs text-fb-text-secondary truncate">{user.email}</p>
                         </div>
-                      </div>
+                      </button>
                       <button onClick={handleLogout} className={mobileItem}>
                         <span className="inline-flex items-center gap-2">
                           <FiLogOut size={20} />

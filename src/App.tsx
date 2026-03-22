@@ -7,6 +7,8 @@ import Footer from './components/layout/Footer'
 import AdminProductForm from "./pages/admin/AdminProductForm";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import ScrollToTop from "./components/utils/ScrollToTop";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
 
@@ -20,7 +22,9 @@ function App() {
             <Route path='/' element={<Home adminMode={false} />} />
             <Route path='/acceso' element={<AuthPage />} />
             <Route path="/producto/:id" element={<ProductDetail />} />
+            <Route path='/perfil' element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path='/administracion' element={<ProtectedRoute requiredRole="ROLE_ADMIN"><Home adminMode={true} /></ProtectedRoute>} />
+            <Route path='/administracion/usuarios' element={<ProtectedRoute requiredRole="ROLE_ADMIN"><AdminUsersPage /></ProtectedRoute>} />
             <Route path='/administracion/producto/nuevo' element={<ProtectedRoute requiredRole="ROLE_ADMIN"><AdminProductForm mode="create" /></ProtectedRoute>} />
             <Route path='/administracion/producto/:id/editar' element={<ProtectedRoute requiredRole="ROLE_ADMIN"><AdminProductForm mode="edit" /></ProtectedRoute>} />
           </Routes>

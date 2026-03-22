@@ -23,6 +23,16 @@ export type LoginPayload = {
   password: string;
 };
 
+export type ChangePasswordPayload = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+export type MessageResponse = {
+  message: string;
+};
+
 export const AUTH_TOKEN_STORAGE_KEY = "authToken";
 export const AUTH_USER_STORAGE_KEY = "authUser";
 
@@ -48,12 +58,14 @@ async function parseError(res: Response): Promise<ApiError> {
 }
 
 async function authRequest<T>(path: string, options: RequestInit): Promise<T> {
+  const { headers: customHeaders, ...restOptions } = options;
+
   const res = await fetch(`${authBase}${path}`, {
+    ...restOptions,
     headers: {
       "Content-Type": "application/json",
-      ...(options.headers || {}),
+      ...(customHeaders || {}),
     },
-    ...options,
   });
 
   if (!res.ok) {
@@ -80,5 +92,12 @@ export const authService = {
     authRequest<AuthUser>("/me", {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  changePassword: (token: string, payload: ChangePasswordPayload) =>
+    authRequest<MessageResponse>("/change-password", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
     }),
 };

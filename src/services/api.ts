@@ -2,14 +2,15 @@ const baseURL = (import.meta.env.VITE_API_BASE_URL as string);
 
 async function request<T>(path: string, options: RequestInit): Promise<T> {
   const token = localStorage.getItem("authToken");
+  const { headers: customHeaders, ...restOptions } = options;
 
   const res = await fetch(`${baseURL}${path}`, {
+    ...restOptions,
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options?.headers || {}),
+      ...(customHeaders || {}),
     },
-    ...options,
   });
 
   if (!res.ok) {

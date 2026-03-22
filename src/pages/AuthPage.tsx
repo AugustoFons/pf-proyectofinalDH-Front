@@ -134,7 +134,7 @@ export default function AuthPage() {
       <div className="mx-auto max-w-xl rounded-2xl border border-fb-stroke bg-fb-surface p-6 sm:p-8 shadow-sm">
         <h1 className="text-2xl font-semibold text-fb-text">Acceso a tu cuenta</h1>
         <p className="mt-1 text-sm text-fb-text-secondary">
-          Inicia sesion o crea tu cuenta para acceder a funcionalidades autenticadas.
+          Inicia sesión o crea tu cuenta para acceder a la plataforma.
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-2 rounded-xl bg-fb-neutral p-1">
@@ -176,7 +176,7 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-fb-text">Contrasena</label>
+              <label className="mb-1 block text-sm font-medium text-fb-text">Contraseña</label>
               <input
                 type="password"
                 value={loginPassword}
@@ -230,7 +230,7 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-fb-text">Contrasena</label>
+              <label className="mb-1 block text-sm font-medium text-fb-text">Contraseña</label>
               <input
                 type="password"
                 value={registerPassword}
