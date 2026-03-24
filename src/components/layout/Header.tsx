@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd, HiUsers } from "react-icons/hi";
+import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd, HiUsers, HiTag } from "react-icons/hi";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { BiAddToQueue } from "react-icons/bi";
 import { btnPrimary, btnGhost, btnSuccess, btnDangerGhost, mobileItem } from "../../styles/headerButtons";
@@ -18,6 +18,7 @@ export default function Header() {
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
   const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase() || "U";
   const isUsersSection = location.pathname.startsWith("/administracion/usuarios");
+  const isCategoriesSection = location.pathname.startsWith("/administracion/categorias");
 
   const goToAuth = (tab: "login" | "register") => {
     navigate("/acceso", { state: { tab } });
@@ -91,6 +92,11 @@ export default function Header() {
                 <HiUsers size={18} />
                 <span>Usuarios</span>
               </NavLink>
+
+              <NavLink to="/administracion/categorias" className={isCategoriesSection ? btnPrimary : btnGhost}>
+                <HiTag size={18} />
+                <span>Categorías</span>
+              </NavLink>
             </>
           )}
 
@@ -111,10 +117,10 @@ export default function Header() {
           {isAuthenticated && user && (
             <div className="relative">
               <button
-                className="inline-flex items-center gap-3 rounded-full border border-fb-stroke bg-fb-surface px-3 py-1.5 hover:bg-fb-neutral transition cursor-pointer"
+                className="inline-flex items-center gap-2.5 rounded-full border border-fb-stroke bg-fb-surface px-2.5 py-1 hover:bg-fb-neutral transition cursor-pointer"
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
               >
-                <span className="grid h-9 w-9 place-items-center rounded-full bg-fb-primary text-fb-white text-sm font-semibold">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-fb-primary text-fb-white text-xs font-semibold">
                   {initials}
                 </span>
                 <span className="text-sm font-medium text-fb-text">{fullName}</span>
@@ -183,6 +189,15 @@ export default function Header() {
                       >
                         <HiUsers size={20} />
                         <span>Usuarios</span>
+                      </NavLink>
+
+                      <NavLink
+                        to="/administracion/categorias"
+                        onClick={closeMenu}
+                        className={(isCategoriesSection ? btnPrimary : btnGhost) + " w-full rounded-xl py-3"}
+                      >
+                        <HiTag size={20} />
+                        <span>Categorías</span>
                       </NavLink>
                     </>
                   )}

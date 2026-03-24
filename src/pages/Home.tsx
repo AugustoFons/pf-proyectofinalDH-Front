@@ -141,6 +141,7 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
       <div className="max-w-[96rem] mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <Sidebar
+          adminMode={adminMode}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           selectedCategoryId={selectedCategoryId}

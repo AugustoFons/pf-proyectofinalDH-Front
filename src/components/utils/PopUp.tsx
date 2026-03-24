@@ -3,12 +3,15 @@ import { HiX, HiExclamationCircle } from "react-icons/hi";
 type PopUpProps = {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
   variant?: "danger" | "warning" | "info";
+  closeOnConfirm?: boolean;
+  isConfirming?: boolean;
+  errorMessage?: string | null;
 };
 
 export function PopUp({
@@ -19,9 +22,29 @@ export function PopUp({
   message,
   confirmText = "Confirmar",
   cancelText = "Cancelar",
-  variant = "danger"
+  variant = "danger",
+  closeOnConfirm = true,
+  isConfirming = false,
+  errorMessage = null,
 }: PopUpProps) {
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    if (isConfirming) return;
+    onClose();
+  };
+
+  const handleConfirm = async () => {
+    if (isConfirming) return;
+    try {
+      await onConfirm();
+      if (closeOnConfirm) {
+        onClose();
+      }
+    } catch {
+      // Errors are handled by the parent and shown via errorMessage.
+    }
+  };
 
   const variantStyles = {
     danger: {
@@ -48,7 +71,7 @@ export function PopUp({
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* Dialog */}
@@ -59,7 +82,8 @@ export function PopUp({
         >
           {/* Close button */}
           <button
-            onClick={onClose}
+            onClick={handleClose}
+            disabled={isConfirming}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition cursor-pointer"
           >
             <HiX className="w-5 h-5" />
@@ -82,22 +106,27 @@ export function PopUp({
               {message}
             </p>
 
+            {errorMessage && (
+              <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {errorMessage}
+              </p>
+            )}
+
             {/* Actions */}
             <div className="mt-6 flex gap-3">
               <button
-                onClick={onClose}
+                onClick={handleClose}
+                disabled={isConfirming}
                 className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
               >
                 {cancelText}
               </button>
               <button
-                onClick={() => {
-                  onConfirm();
-                  onClose();
-                }}
+                onClick={handleConfirm}
+                disabled={isConfirming}
                 className={`flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-lg transition focus:outline-none focus:ring-2 ${styles.button}`}
               >
-                {confirmText}
+                {isConfirming ? "Procesando..." : confirmText}
               </button>
             </div>
           </div>

@@ -1,16 +1,18 @@
 import { useEffect, useState, useRef } from "react";
+import { NavLink } from "react-router-dom";
 import { categoryService, type CategoryRes } from "../../services/categoryService";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import '../../styles/scrollbars.css';
 
 type SidebarProps = {
+  adminMode?: boolean;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   selectedCategoryId: number | null;
   onCategorySelect: (id: number | null) => void;
 };
 
-export const Sidebar = ({ searchQuery, onSearchChange, selectedCategoryId, onCategorySelect }: SidebarProps) => {
+export const Sidebar = ({ adminMode = false, searchQuery, onSearchChange, selectedCategoryId, onCategorySelect }: SidebarProps) => {
   const [categories, setCategories] = useState<CategoryRes[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -167,6 +169,15 @@ export const Sidebar = ({ searchQuery, onSearchChange, selectedCategoryId, onCat
             className="w-full px-3 py-2 border border-fb-stroke rounded-lg focus:outline-none focus:ring-2 focus:ring-fb-primary"
           />
         </div>
+
+        {adminMode && (
+          <NavLink
+            to="/administracion/categorias"
+            className="mb-4 inline-flex w-full justify-center rounded-md bg-fb-primary px-3 py-2 text-sm font-semibold text-fb-white hover:bg-fb-primary-hover transition"
+          >
+            Editar categorías
+          </NavLink>
+        )}
 
         {/* Categorías */}
         <h2 className="font-sans text-sm font-semibold text-fb-text mb-2">
