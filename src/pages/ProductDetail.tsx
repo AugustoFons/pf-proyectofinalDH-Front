@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { productService } from "../services/productService";
 import { TbArrowLeft, TbChevronLeft, TbChevronRight } from "react-icons/tb";
+import { getFeatureIcon } from "../constants/featureIcons";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -33,6 +34,7 @@ export default function ProductDetail() {
   }
 
   const images: string[] = product.images?.length ? product.images : ["/placeholder.png"];
+  const features = product.features ?? [];
   
   const handlePrevImage = () => {
     setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -130,6 +132,43 @@ export default function ProductDetail() {
                   )}
                 </div>
               </div>
+            )}
+
+            {/* ════════════════════════════════════════════════
+                BANNER DE CARACTERÍSTICAS
+               ════════════════════════════════════════════════ */}
+            {features.length > 0 && (
+              <section className="mt-6">
+                <h2 className="text-lg font-semibold text-fb-text mb-3">
+                  Características
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {features.map((feat: { icon: string; label: string }, idx: number) => {
+                    const iconEntry = getFeatureIcon(feat.icon);
+                    const IconComp = iconEntry?.icon;
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-fb-stroke bg-fb-surface shadow-sm hover:shadow-md hover:border-fb-primary/40 transition-all duration-200 group"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fb-primary/15 to-fb-primary/5 flex items-center justify-center shrink-0 group-hover:from-fb-primary/25 group-hover:to-fb-primary/10 transition-all duration-200">
+                          {IconComp ? (
+                            <IconComp
+                              size={22}
+                              className="text-fb-primary group-hover:scale-110 transition-transform duration-200"
+                            />
+                          ) : (
+                            <span className="text-xs text-fb-text-secondary">?</span>
+                          )}
+                        </div>
+                        <span className="text-sm text-fb-text font-medium leading-snug">
+                          {feat.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
             )}
           </section>
 

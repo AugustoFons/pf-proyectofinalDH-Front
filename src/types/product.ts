@@ -1,6 +1,10 @@
+export type FeatureReq = { icon: string; label: string };
+export type FeatureRes = { icon: string; label: string };
+
 export type ProductRes = {
   id: number; name: string; description?: string; price?: number;
   images: string[]; categories: number[]; productType?: string;
+  features?: FeatureRes[];
 };
 
 export type Page<T> = {
@@ -8,7 +12,8 @@ export type Page<T> = {
 };
 
 export type ProductCreateReq = {
-  name: string; description?: string; price?: number; imageUrls?: string[]; categoryIds?: number[]; productType?: string;
+  name: string; description?: string; price?: number; imageUrls?: string[];
+  categoryIds?: number[]; productType?: string; features?: FeatureReq[];
 };
 
 export type ProductUpdateReq = ProductCreateReq;
