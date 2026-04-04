@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { productService } from "../services/productService";
 import { TbArrowLeft, TbChevronLeft, TbChevronRight } from "react-icons/tb";
+import { HiExclamationCircle } from "react-icons/hi";
 import { getFeatureIcon } from "../constants/featureIcons";
+import { useAuth } from "../auth/AuthContext";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const [product, setProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAllThumbnails, setShowAllThumbnails] = useState(false);
+  const [showAuthToast, setShowAuthToast] = useState(false);
 
 
   useEffect(() => {
@@ -42,6 +46,15 @@ export default function ProductDetail() {
 
   const handleNextImage = () => {
     setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handlePrimaryAction = () => {
+    if (!isAuthenticated) {
+      setShowAuthToast(true);
+      return;
+    }
+
+    // TODO: Connect this action to checkout/reservation flow when available.
   };
 
   const MAX_VISIBLE_THUMBNAILS = 5;
@@ -194,7 +207,10 @@ export default function ProductDetail() {
               </p>
 
               {/* Botón reservar/comprar */}
-              <button className="w-full py-3 rounded-lg bg-fb-primary text-white font-semibold hover:bg-fb-primary-dark transition cursor-pointer">
+              <button
+                onClick={handlePrimaryAction}
+                className="w-full py-3 rounded-lg bg-fb-primary text-white font-semibold hover:bg-fb-primary-dark transition cursor-pointer"
+              >
                 {
                   product.productType === "RESERVA" ? "Reservar ahora" : "Comprar ahora"
                 }
@@ -221,6 +237,43 @@ export default function ProductDetail() {
           </aside>
         </div>
       </div>
+
+      {showAuthToast && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/45 backdrop-blur-[1px]"
+            onClick={() => setShowAuthToast(false)}
+          />
+
+          <div className="relative w-full max-w-sm rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-2xl">
+            <div className="flex items-start gap-3">
+              <HiExclamationCircle className="mt-0.5 h-6 w-6 shrink-0 text-amber-600" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-amber-900">Debes iniciar sesión para continuar.</p>
+                <p className="mt-1 text-xs text-amber-800">Para comprar o reservar, primero inicia sesión.</p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAuthToast(false)}
+                className="flex-1 rounded-lg border border-amber-300 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 cursor-pointer"
+              >
+                Cerrar
+              </button>
+              <Link
+                to="/acceso"
+                state={{ tab: "login" }}
+                className="flex-1 rounded-lg bg-amber-600 px-3 py-2 text-center text-sm font-semibold text-white hover:bg-amber-700"
+                onClick={() => setShowAuthToast(false)}
+              >
+                Iniciar sesión
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

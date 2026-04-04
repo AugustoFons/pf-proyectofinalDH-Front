@@ -8,6 +8,17 @@ import { FEATURE_ICONS, getFeatureIcon } from "../../constants/featureIcons";
 
 type Props = { mode: "create" | "edit" };
 
+type FieldErrors = {
+  name?: string;
+  price?: string;
+  imageUrls?: string;
+  categoryIds?: string;
+};
+
+const MIN_NAME_LENGTH = 2;
+const MAX_NAME_LENGTH = 150;
+const MAX_IMAGES = 10;
+
 export default function AdminProductForm({ mode }: Props) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -15,6 +26,7 @@ export default function AdminProductForm({ mode }: Props) {
   const isEdit = mode === "edit";
 
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -62,17 +74,24 @@ export default function AdminProductForm({ mode }: Props) {
     setCategoryIds((prev) =>
       prev.includes(catId) ? prev.filter((x) => x !== catId) : [...prev, catId]
     );
+    setFieldErrors((prev) => ({ ...prev, categoryIds: undefined }));
   };
 
   const setImgAt = (idx: number, value: string) =>
     setImageUrls((prev) => prev.map((v, i) => (i === idx ? value : v)));
 
-  const addImg = () => setImageUrls((prev) => [...prev, ""]);
+  const addImg = () => {
+    setImageUrls((prev) => (prev.length >= MAX_IMAGES ? prev : [...prev, ""]));
+  };
   const removeImg = (idx: number) =>
     setImageUrls((prev) => {
       const next = prev.filter((_, i) => i !== idx);
       return next.length ? next : [""];
     });
+
+  const clearFieldError = (field: keyof FieldErrors) => {
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
 
   // ── Feature helpers ──
   const openNewFeature = () => {
@@ -126,12 +145,49 @@ export default function AdminProductForm({ mode }: Props) {
       )
     : FEATURE_ICONS;
 
+  const validateForm = () => {
+    const errors: FieldErrors = {};
+    const normalizedName = name.trim();
+    const normalizedPrice = price.trim();
+    const validImages = imageUrls.map((x) => x.trim()).filter(Boolean);
+
+    if (!normalizedName) {
+      errors.name = "El nombre es obligatorio";
+    } else if (normalizedName.length < MIN_NAME_LENGTH) {
+      errors.name = `El nombre debe tener al menos ${MIN_NAME_LENGTH} caracteres`;
+    } else if (normalizedName.length > MAX_NAME_LENGTH) {
+      errors.name = `El nombre no puede superar ${MAX_NAME_LENGTH} caracteres`;
+    }
+
+    if (!normalizedPrice) {
+      errors.price = "El precio es obligatorio";
+    } else {
+      const parsedPrice = Number(normalizedPrice);
+      if (Number.isNaN(parsedPrice) || parsedPrice <= 0) {
+        errors.price = "El precio debe ser un numero mayor a 0";
+      }
+    }
+
+    if (validImages.length === 0) {
+      errors.imageUrls = "Debes cargar al menos 1 imagen";
+    } else if (validImages.length > MAX_IMAGES) {
+      errors.imageUrls = `Puedes cargar hasta ${MAX_IMAGES} imagenes`;
+    }
+
+    if (categoryIds.length === 0) {
+      errors.categoryIds = "Debes seleccionar al menos 1 categoria";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!name.trim()) {
-      setError("El nombre es obligatorio.");
+    if (!validateForm()) {
+      setError("Revisa los campos marcados en rojo.");
       return;
     }
 
@@ -197,19 +253,37 @@ export default function AdminProductForm({ mode }: Props) {
                   <label className="block text-sm font-semibold text-fb-text mb-1">Nombre</label>
                   <input
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 border border-fb-stroke rounded-lg focus:outline-none focus:ring-2 focus:ring-fb-primary"
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      clearFieldError("name");
+                    }}
+                    className={[
+                      "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2",
+                      fieldErrors.name
+                        ? "border-red-500 focus:ring-red-500/30"
+                        : "border-fb-stroke focus:ring-fb-primary",
+                    ].join(" ")}
                   />
+                  {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-fb-text mb-1">Precio</label>
                   <input
                     value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                    onChange={(e) => {
+                      setPrice(e.target.value);
+                      clearFieldError("price");
+                    }}
                     inputMode="decimal"
-                    className="w-full px-3 py-2 border border-fb-stroke rounded-lg focus:outline-none focus:ring-2 focus:ring-fb-primary"
+                    className={[
+                      "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2",
+                      fieldErrors.price
+                        ? "border-red-500 focus:ring-red-500/30"
+                        : "border-fb-stroke focus:ring-fb-primary",
+                    ].join(" ")}
                   />
+                  {fieldErrors.price && <p className="mt-1 text-xs text-red-600">{fieldErrors.price}</p>}
                 </div>
 
                 <div>
@@ -261,6 +335,7 @@ export default function AdminProductForm({ mode }: Props) {
                     <button
                       type="button"
                       onClick={addImg}
+                      disabled={imageUrls.length >= MAX_IMAGES}
                       className="px-3 py-1.5 rounded-md font-sans font-medium transition bg-fb-surface text-fb-primary border border-fb-primary hover:bg-fb-primary/10 text-sm cursor-pointer"
                     >
                       + Agregar
@@ -272,8 +347,16 @@ export default function AdminProductForm({ mode }: Props) {
                       <div key={idx} className="flex gap-2">
                         <input
                           value={img}
-                          onChange={(e) => setImgAt(idx, e.target.value)}
-                          className="flex-1 px-3 py-2 border border-fb-stroke rounded-lg focus:outline-none focus:ring-2 focus:ring-fb-primary"
+                          onChange={(e) => {
+                            setImgAt(idx, e.target.value);
+                            clearFieldError("imageUrls");
+                          }}
+                          className={[
+                            "flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2",
+                            fieldErrors.imageUrls
+                              ? "border-red-500 focus:ring-red-500/30"
+                              : "border-fb-stroke focus:ring-fb-primary",
+                          ].join(" ")}
                           placeholder="https://..."
                         />
                         <button
@@ -287,6 +370,9 @@ export default function AdminProductForm({ mode }: Props) {
                       </div>
                     ))}
                   </div>
+                  {fieldErrors.imageUrls && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.imageUrls}</p>
+                  )}
                 </div>
 
                 {/* ════════════════════════════════════════════════
@@ -501,6 +587,9 @@ export default function AdminProductForm({ mode }: Props) {
                       );
                     })}
                   </div>
+                  {fieldErrors.categoryIds && (
+                    <p className="mt-2 text-xs text-red-600">{fieldErrors.categoryIds}</p>
+                  )}
                 </div>
               </aside>
             </form>

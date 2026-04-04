@@ -189,7 +189,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 w-full rounded-lg bg-fb-primary px-4 py-2.5 font-medium text-fb-white transition hover:bg-fb-primary-hover disabled:cursor-not-allowed disabled:opacity-70"
+              className="cursor-pointer mt-2 w-full rounded-lg bg-fb-primary px-4 py-2.5 font-medium text-fb-white transition hover:bg-fb-primary-hover disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? "Ingresando..." : "Ingresar"}
             </button>
@@ -243,7 +243,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 w-full rounded-lg bg-[#42B72A] px-4 py-2.5 font-medium text-fb-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70"
+              className="cursor-pointer mt-2 w-full rounded-lg bg-[#42B72A] px-4 py-2.5 font-medium text-fb-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? "Creando cuenta..." : "Crear cuenta"}
             </button>
