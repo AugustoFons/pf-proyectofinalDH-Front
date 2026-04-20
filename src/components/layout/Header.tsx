@@ -64,14 +64,14 @@ export default function Header() {
         {/* Mobile toggle */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden p-2 rounded-full border border-fb-stroke/70 text-fb-primary hover:bg-fb-primary/10 hover:border-fb-primary/30 transition cursor-pointer"
+          className="lg:hidden p-2 rounded-full border border-fb-stroke text-fb-primary hover:bg-fb-primary/10 hover:border-fb-primary/30 transition cursor-pointer"
           aria-label="Menú"
         >
           {isMenuOpen ? <HiX size={22} /> : <HiMenu size={22} />}
         </button>
 
         {/* Desktop buttons */}
-        <div className="hidden md:flex gap-3 relative -top-0.5">
+        <div className="hidden lg:flex gap-3 relative -top-0.5">
           {isAdmin && (
             <>
               <NavLink to="/administracion/producto/nuevo" className={btnPrimary}>
@@ -149,7 +149,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <div
             className="fixed inset-0 bg-black/20"
             onClick={closeMenu}

@@ -6,13 +6,11 @@ import '../../styles/scrollbars.css';
 
 type SidebarProps = {
   adminMode?: boolean;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
   selectedCategoryId: number | null;
   onCategorySelect: (id: number | null) => void;
 };
 
-export const Sidebar = ({ adminMode = false, searchQuery, onSearchChange, selectedCategoryId, onCategorySelect }: SidebarProps) => {
+export const Sidebar = ({ adminMode = false, selectedCategoryId, onCategorySelect }: SidebarProps) => {
   const [categories, setCategories] = useState<CategoryRes[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -27,10 +25,6 @@ export const Sidebar = ({ adminMode = false, searchQuery, onSearchChange, select
         console.error("Error al cargar categorías:", error);
       });
   }, []);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSearchChange(e.target.value);
-  };
 
   // Detectar si se pueden mostrar flechas
   const checkScroll = () => {
@@ -71,18 +65,8 @@ export const Sidebar = ({ adminMode = false, searchQuery, onSearchChange, select
 
   return (
     <>
-      {/* VISTA MÓVIL - Buscador + Categorías Horizontales */}
+      {/* VISTA MÓVIL - Categorías Horizontales */}
       <div className="lg:hidden col-span-full space-y-3">
-        <div className="px-0">
-          <input
-            type="text"
-            placeholder="Buscar en marketplease..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="w-full px-4 py-3 border border-fb-stroke rounded-lg focus:outline-none focus:ring-2 focus:ring-fb-primary bg-fb-surface"
-          />
-        </div>
-
         {/* Categorías en horizontal con flechas */}
         <div className="flex items-center gap-2">
           {showLeftArrow && (
@@ -96,7 +80,7 @@ export const Sidebar = ({ adminMode = false, searchQuery, onSearchChange, select
           )}
 
           {/* Contenedor de categorías */}
-          <div 
+          <div
             ref={scrollRef}
             className="hide-scrollbar flex gap-2 overflow-x-auto flex-1"
           >
@@ -111,7 +95,7 @@ export const Sidebar = ({ adminMode = false, searchQuery, onSearchChange, select
             >
               Todas
             </button>
-            
+
             {categories.map((category) => {
               const active = selectedCategoryId === category.id;
               return (
@@ -159,17 +143,6 @@ export const Sidebar = ({ adminMode = false, searchQuery, onSearchChange, select
         self-start 
         overflow-y-auto
       ">      
-        {/* Buscador */}
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Buscar en marketplease..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="w-full px-3 py-2 border border-fb-stroke rounded-lg focus:outline-none focus:ring-2 focus:ring-fb-primary"
-          />
-        </div>
-
         {adminMode && (
           <NavLink
             to="/administracion/categorias"

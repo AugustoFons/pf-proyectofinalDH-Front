@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Card } from "../components/layout/Card";
 import { CardSkeleton } from "../components/layout/CardSkeleton";
+import { SearchBubble } from "../components/layout/SearchBubble";
 import { Sidebar } from "../components/layout/Sidebar";
 import { productService } from '../services/productService';
 import type { ProductRes } from "../types/product";
@@ -21,9 +22,18 @@ type ApiPageResponse = {
 export default function Home({ adminMode = false }: { adminMode?: boolean }) {
   const [pageData, setPageData] = useState<ApiPageResponse | null>(null);
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
-  const [searchQuery, setSearchQuery] = useState(""); // estado para el termino de busqueda
+  const [draftQuery, setDraftQuery] = useState("");
+  const [appliedQuery, setAppliedQuery] = useState("");
+  const [searchMode, setSearchMode] = useState<"PRODUCTOS" | "RESERVAS">("PRODUCTOS");
+  const [appliedMode, setAppliedMode] = useState<"PRODUCTOS" | "RESERVAS">("PRODUCTOS");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [appliedDateFrom, setAppliedDateFrom] = useState<string | undefined>(undefined);
+  const [appliedDateTo, setAppliedDateTo] = useState<string | undefined>(undefined);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null); // categoria seleccionada
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [reloadTick, setReloadTick] = useState(0); // refrescar al borrar
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,16 +44,29 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
   // Resetear el arreglo random si cambian filtros
   useEffect(() => {
     homeRandomRef.current = null;
-  }, [debouncedSearchQuery, selectedCategoryId]);
+  }, [appliedQuery, selectedCategoryId, appliedMode, appliedDateFrom, appliedDateTo]);
 
   useEffect(() => {
+    const text = draftQuery.trim();
+    if (text.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsSuggesting(true);
     const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-      setCurrentPageNumber(0); // Reset página al buscar
-    }, 500);
+      productService.suggestions(text, 6)
+        .then((data) => {
+          setSuggestions(data);
+          setShowSuggestions(true);
+        })
+        .catch(() => setSuggestions([]))
+        .finally(() => setIsSuggesting(false));
+    }, 250);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [draftQuery]);
 
   useEffect(() => {
     setCurrentPageNumber(0);
@@ -58,14 +81,18 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
     productService.search({
       page: currentPageNumber,
       size: PAGE_SIZE,
-      query: searchQuery || undefined,
-      categoryId: selectedCategoryId || undefined
+      query: appliedQuery || undefined,
+      categoryId: selectedCategoryId || undefined,
+      productType: appliedMode === "RESERVAS" ? "RESERVA" : undefined,
+      dateFrom: appliedMode === "RESERVAS" ? appliedDateFrom : undefined,
+      dateTo: appliedMode === "RESERVAS" ? appliedDateTo : undefined,
     })
       .then((response: any) => {
         const shouldRandomize =
           currentPageNumber === 0 &&
           !selectedCategoryId &&
-          !debouncedSearchQuery;
+          !appliedQuery &&
+          appliedMode === "PRODUCTOS";
 
         if (shouldRandomize) {
           if (!homeRandomRef.current) {
@@ -78,7 +105,35 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [currentPageNumber, debouncedSearchQuery, selectedCategoryId, reloadTick]);
+  }, [currentPageNumber, appliedQuery, selectedCategoryId, reloadTick, appliedMode, appliedDateFrom, appliedDateTo]);
+
+  const handleSubmitSearch = () => {
+    if (searchMode === "RESERVAS" && dateFrom && dateTo && dateTo < dateFrom) {
+      setError("La fecha hasta no puede ser menor que la fecha desde.");
+      return;
+    }
+
+    setError(null);
+    setAppliedQuery(draftQuery.trim());
+    setAppliedMode(searchMode);
+    setAppliedDateFrom(searchMode === "RESERVAS" ? (dateFrom || undefined) : undefined);
+    setAppliedDateTo(searchMode === "RESERVAS" ? (dateTo || undefined) : undefined);
+    setCurrentPageNumber(0);
+    setShowSuggestions(false);
+  };
+
+  const handleModeChange = (mode: "PRODUCTOS" | "RESERVAS") => {
+    setSearchMode(mode);
+    if (mode === "PRODUCTOS") {
+      setDateFrom("");
+      setDateTo("");
+    }
+  };
+
+  const handleSuggestionSelect = (value: string) => {
+    setDraftQuery(value);
+    setShowSuggestions(false);
+  };
 
   const handlePreviousPage = () => {
     if (currentPageNumber > 0) {
@@ -142,13 +197,29 @@ export default function Home({ adminMode = false }: { adminMode?: boolean }) {
 
         <Sidebar
           adminMode={adminMode}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
           selectedCategoryId={selectedCategoryId}
           onCategorySelect={setSelectedCategoryId}
         />
 
-        <section className="col-span-1 lg:col-span-9">
+        <section className="col-span-1 lg:col-span-9 relative">
+          <div className="fixed top-[14px] sm:top-[22px] right-16 sm:right-[4.5rem] z-[60] lg:absolute lg:-top-9 lg:right-0 lg:z-30">
+            <SearchBubble
+              query={draftQuery}
+              onQueryChange={setDraftQuery}
+              mode={searchMode}
+              onModeChange={handleModeChange}
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              onDateFromChange={setDateFrom}
+              onDateToChange={setDateTo}
+              onSubmit={handleSubmitSearch}
+              suggestions={suggestions}
+              showSuggestions={showSuggestions}
+              isSuggesting={isSuggesting}
+              onSuggestionSelect={handleSuggestionSelect}
+            />
+          </div>
+
           <h1 className="font-sans text-xl font-semibold text-fb-text mb-4">
             {adminMode ? "Lista de Productos" : "Recomendaciones de hoy"}
           </h1>

@@ -17,3 +17,13 @@ export type ProductCreateReq = {
 };
 
 export type ProductUpdateReq = ProductCreateReq;
+
+export type ProductSearchParams = {
+  page?: number;
+  size?: number;
+  query?: string;
+  categoryId?: number;
+  productType?: "VENTA" | "RESERVA";
+  dateFrom?: string;
+  dateTo?: string;
+};
