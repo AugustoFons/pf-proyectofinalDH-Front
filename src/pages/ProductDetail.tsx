@@ -5,6 +5,9 @@ import { TbArrowLeft, TbChevronLeft, TbChevronRight } from "react-icons/tb";
 import { HiExclamationCircle } from "react-icons/hi";
 import { getFeatureIcon } from "../constants/featureIcons";
 import { useAuth } from "../auth/AuthContext";
+import type { ProductAvailabilityRes } from "../types/product";
+import AvailabilityCalendar from "../components/utils/AvailabilityCalendar";
+import { reservationService } from "../services/reservationService";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -16,6 +19,15 @@ export default function ProductDetail() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAllThumbnails, setShowAllThumbnails] = useState(false);
   const [showAuthToast, setShowAuthToast] = useState(false);
+  const [availability, setAvailability] = useState<ProductAvailabilityRes | null>(null);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [availabilityRetryTick, setAvailabilityRetryTick] = useState(0);
+  const [selectedFrom, setSelectedFrom] = useState("");
+  const [selectedTo, setSelectedTo] = useState("");
+  const [reservationLoading, setReservationLoading] = useState(false);
+  const [reservationFeedback, setReservationFeedback] = useState<string | null>(null);
+  const [reservationFeedbackType, setReservationFeedbackType] = useState<"error" | "success">("success");
 
 
   useEffect(() => {
@@ -25,9 +37,32 @@ export default function ProductDetail() {
       .then((res: any) => {
         setProduct(res);
         setActiveIndex(0);
+        setSelectedFrom("");
+        setSelectedTo("");
+        setReservationFeedback(null);
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !product || product.productType !== "RESERVA") {
+      setAvailability(null);
+      setAvailabilityError(null);
+      setAvailabilityLoading(false);
+      return;
+    }
+
+    setAvailabilityLoading(true);
+    setAvailabilityError(null);
+
+    productService
+      .getAvailability(id)
+      .then((res) => setAvailability(res))
+      .catch(() => {
+        setAvailabilityError("No pudimos obtener la disponibilidad en este momento.");
+      })
+      .finally(() => setAvailabilityLoading(false));
+  }, [id, product, availabilityRetryTick]);
 
   if (loading) {
     return <p className="mt-10 text-center text-fb-text-secondary">Cargando...</p>;
@@ -51,6 +86,38 @@ export default function ProductDetail() {
   const handlePrimaryAction = () => {
     if (!isAuthenticated) {
       setShowAuthToast(true);
+      return;
+    }
+
+    if (product.productType === "RESERVA") {
+      if (!selectedFrom || !selectedTo) {
+        setReservationFeedbackType("error");
+        setReservationFeedback("Selecciona un rango de fechas para reservar.");
+        return;
+      }
+
+      setReservationLoading(true);
+      setReservationFeedback(null);
+
+      reservationService
+        .create({
+          productId: product.id,
+          dateFrom: selectedFrom,
+          dateTo: selectedTo,
+        })
+        .then(() => {
+          setReservationFeedbackType("success");
+          setReservationFeedback("Reserva creada con exito.");
+          setSelectedFrom("");
+          setSelectedTo("");
+          setAvailabilityRetryTick((v) => v + 1);
+        })
+        .catch((err: Error) => {
+          setReservationFeedbackType("error");
+          setReservationFeedback(err.message || "No se pudo crear la reserva.");
+        })
+        .finally(() => setReservationLoading(false));
+
       return;
     }
 
@@ -206,15 +273,66 @@ export default function ProductDetail() {
                 ${product.price?.toFixed(2)}
               </p>
 
+              {product.productType === "RESERVA" && (
+                <>
+                  {availabilityLoading && (
+                    <div className="mt-3 rounded-xl border border-fb-stroke bg-fb-neutral p-4 text-sm text-fb-text-secondary">
+                      Cargando disponibilidad...
+                    </div>
+                  )}
+
+                  {!availabilityLoading && availabilityError && (
+                    <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-4">
+                      <p className="text-sm text-red-700">{availabilityError}</p>
+                      <button
+                        type="button"
+                        onClick={() => setAvailabilityRetryTick((v) => v + 1)}
+                        className="mt-3 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  )}
+
+                  {!availabilityLoading && !availabilityError && availability && (
+                    <AvailabilityCalendar
+                      availability={availability}
+                      selectedFrom={selectedFrom}
+                      selectedTo={selectedTo}
+                      onSelectRange={(from, to) => {
+                        setSelectedFrom(from);
+                        setSelectedTo(to);
+                        setReservationFeedback(null);
+                      }}
+                    />
+                  )}
+                </>
+              )}
+
               {/* Botón reservar/comprar */}
               <button
                 onClick={handlePrimaryAction}
+                disabled={reservationLoading}
                 className="w-full py-3 rounded-lg bg-fb-primary text-white font-semibold hover:bg-fb-primary-dark transition cursor-pointer"
               >
                 {
-                  product.productType === "RESERVA" ? "Reservar ahora" : "Comprar ahora"
+                  product.productType === "RESERVA"
+                    ? reservationLoading
+                      ? "Reservando..."
+                      : "Reservar ahora"
+                    : "Comprar ahora"
                 }
               </button>
+
+              {reservationFeedback && (
+                <p
+                  className={`mt-3 text-sm ${
+                    reservationFeedbackType === "success" ? "text-emerald-700" : "text-red-700"
+                  }`}
+                >
+                  {reservationFeedback}
+                </p>
+              )}
 
               {/* Ubicación u otros datos */}
               <div className="mt-4 text-sm text-fb-text-secondary">

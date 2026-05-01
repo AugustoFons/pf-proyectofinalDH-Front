@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HiXMark } from "react-icons/hi2";
 import { LuSearch, LuCalendar, LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { MONTHS_ES, DAYS_ES, parseDate, toDateStr, generateCalendarCells } from "../../utils/dateUtils";
 
 type SearchMode = "PRODUCTOS" | "RESERVAS";
 
@@ -22,36 +23,10 @@ type SearchBubbleProps = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-const MONTHS_ES = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-];
-const DAYS_ES = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
-
-function toDateStr(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-function parseDate(str: string): Date | null {
-  if (!str) return null;
-  const d = new Date(str + "T00:00:00");
-  return isNaN(d.getTime()) ? null : d;
-}
-
 function formatDisplay(str: string): string {
   const d = parseDate(str);
   if (!d) return "";
   return `${d.getDate()} ${MONTHS_ES[d.getMonth()].slice(0, 3)}`;
-}
-
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month + 1, 0).getDate();
-}
-
-function getFirstDayOfMonth(year: number, month: number): number {
-  // Monday-based: 0=Mon … 6=Sun
-  const day = new Date(year, month, 1).getDay();
-  return (day + 6) % 7;
 }
 
 // ── Calendar ───────────────────────────────────────────────────────────
@@ -79,8 +54,6 @@ const CalendarPanel = ({
   onPrev,
   onNext,
 }: CalendarPanelProps) => {
-  const days = getDaysInMonth(year, month);
-  const firstDay = getFirstDayOfMonth(year, month);
   const rangeEnd = selectedFrom && !selectedTo ? hovered : selectedTo;
 
   const isSelected = (d: Date) => {
@@ -96,12 +69,7 @@ const CalendarPanel = ({
     return d > from && d < to;
   };
 
-  const cells: (Date | null)[] = [
-    ...Array(firstDay).fill(null),
-    ...Array.from({ length: days }, (_, i) => new Date(year, month, i + 1)),
-  ];
-
-  while (cells.length % 7 !== 0) cells.push(null);
+  const cells = generateCalendarCells(year, month);
 
   return (
     <div className="fb-cal-panel">
@@ -262,13 +230,13 @@ const DateRangePicker = ({
         )}
       </div>
 
-      <div className="fb-drp-footer">
+      <div className="fb-drp-footer cursor-pointer">
         <button type="button" className="fb-drp-clear" onClick={handleClear}>
           Limpiar
         </button>
         <button
           type="button"
-          className="fb-drp-apply"
+          className="fb-drp-apply cursor-pointer"
           onClick={onClose}
           disabled={!selectedFrom || !selectedTo}
         >
@@ -298,8 +266,35 @@ export const SearchBubble = ({
 }: SearchBubbleProps) => {
   const [expanded, setExpanded] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [lastSearchedQuery, setLastSearchedQuery] = useState(query);
+  const [lastSearchedDateFrom, setLastSearchedDateFrom] = useState(dateFrom);
+  const [lastSearchedDateTo, setLastSearchedDateTo] = useState(dateTo);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = () => {
+    setLastSearchedQuery(query);
+    setLastSearchedDateFrom(dateFrom);
+    setLastSearchedDateTo(dateTo);
+    onSubmit();
+  };
+
+  useEffect(() => {
+    if (query === "" && lastSearchedQuery !== "") {
+      setLastSearchedQuery("");
+      const timeout = setTimeout(() => {
+        onSubmit();
+      }, 0);
+      return () => clearTimeout(timeout);
+    }
+  }, [query, lastSearchedQuery, onSubmit]);
+
+  useEffect(() => {
+    if (expanded && lastSearchedDateFrom !== dateFrom && lastSearchedDateTo !== dateTo) {
+         setLastSearchedDateFrom(dateFrom);
+         setLastSearchedDateTo(dateTo);
+    }
+  }, [expanded]);
 
   const hasSuggestions = useMemo(
     () => showSuggestions && (isSuggesting || suggestions.length > 0),
@@ -501,8 +496,14 @@ export const SearchBubble = ({
             {/* Cerrar */}
             <button
               type="button"
-              onClick={() => { setExpanded(false); setShowDatePicker(false); }}
-              className="h-9 w-9 rounded-full grid place-items-center text-fb-primary hover:bg-blue-50 transition flex-shrink-0"
+              onClick={() => {
+                setExpanded(false);
+                setShowDatePicker(false);
+                if (query !== "") {
+                  onQueryChange("");
+                }
+              }}
+              className="h-9 w-9 rounded-full cursor-pointer grid place-items-center text-fb-primary hover:bg-blue-50 transition flex-shrink-0"
               aria-label="Cerrar buscador"
             >
               <HiXMark className="w-5 h-5" />
@@ -518,7 +519,7 @@ export const SearchBubble = ({
                 type="text"
                 value={query}
                 onChange={(e) => onQueryChange(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onSubmit()}
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                 placeholder={mode === "RESERVAS" ? "Buscar reservas..." : "Buscar productos..."}
                 className="w-full px-3 py-2 rounded-full border-none focus:outline-none bg-fb-surface text-fb-text text-sm"
               />
@@ -534,7 +535,14 @@ export const SearchBubble = ({
                     <button
                       key={item}
                       type="button"
-                      onClick={() => onSuggestionSelect(item)}
+                      onClick={() => {
+                        setLastSearchedQuery(item);
+                        onSuggestionSelect(item);
+                        // Trigger the search automatically after a short delay
+                        setTimeout(() => {
+                           onSubmit();
+                        }, 0);
+                      }}
                       className="w-full text-left px-3 py-2 text-sm hover:bg-fb-neutral transition flex items-center gap-2"
                     >
                       <LuSearch className="w-3.5 h-3.5 text-fb-text-secondary flex-shrink-0" />
@@ -553,7 +561,7 @@ export const SearchBubble = ({
                   type="button"
                   onClick={() => onModeChange(m)}
                   className={[
-                    "px-3 py-1.5 rounded-full text-xs font-semibold transition",
+                    "px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer",
                     mode === m
                       ? "bg-white text-fb-primary shadow-sm"
                       : "text-fb-primary/60 hover:text-fb-primary",
@@ -570,7 +578,7 @@ export const SearchBubble = ({
                 type="button"
                 onClick={() => setShowDatePicker((v) => !v)}
                 className={[
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition flex-shrink-0 order-4 lg:order-none",
+                  "inline-flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-full text-xs font-semibold border transition flex-shrink-0 order-4 lg:order-none",
                   hasDateRange
                     ? "border-fb-primary bg-blue-50 text-fb-primary"
                     : "border-fb-primary/30 text-fb-primary hover:bg-blue-50",
@@ -585,11 +593,16 @@ export const SearchBubble = ({
             {/* Botón buscar */}
             <button
               type="button"
-              onClick={onSubmit}
-              className="w-9 h-9 rounded-full bg-fb-primary text-white grid place-items-center hover:opacity-90 active:scale-95 transition flex-shrink-0 order-2"
+              onClick={handleSubmit}
+              className={`h-9 rounded-full bg-fb-primary text-white cursor-pointer flex items-center justify-center hover:opacity-90 active:scale-95 transition flex-shrink-0 order-2 ${
+                (query !== lastSearchedQuery || dateFrom !== lastSearchedDateFrom || dateTo !== lastSearchedDateTo) ? "px-4 gap-2" : "w-9"
+              }`}
               aria-label="Realizar búsqueda"
             >
-              <LuSearch className="w-4 h-4" strokeWidth={2.5} />
+              <LuSearch className="w-4 h-4 flex-shrink-0" strokeWidth={2.5} />
+              {(query !== lastSearchedQuery || dateFrom !== lastSearchedDateFrom || dateTo !== lastSearchedDateTo) && (
+                <span className="text-sm font-semibold">Buscar</span>
+              )}
             </button>
 
             {/* ── Date Range Picker doble ── */}

@@ -1,6 +1,16 @@
 export type FeatureReq = { icon: string; label: string };
 export type FeatureRes = { icon: string; label: string };
 
+export type DateRangeRes = { from: string; to: string };
+
+export type ProductAvailabilityRes = {
+  productId: number;
+  from: string;
+  to: string;
+  booked: DateRangeRes[];
+  available: DateRangeRes[];
+};
+
 export type ProductRes = {
   id: number; name: string; description?: string; price?: number;
   images: string[]; categories: number[]; productType?: string;

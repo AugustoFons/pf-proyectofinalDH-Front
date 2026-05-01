@@ -1,5 +1,12 @@
 import { api } from "./api";
-import type { ProductRes, Page, ProductCreateReq, ProductUpdateReq, ProductSearchParams } from "../types/product";
+import type {
+  ProductRes,
+  Page,
+  ProductCreateReq,
+  ProductUpdateReq,
+  ProductSearchParams,
+  ProductAvailabilityRes,
+} from "../types/product";
 
 export const productService = {
 
@@ -8,6 +15,14 @@ export const productService = {
 
   getById: (id: string) =>
     api.get<ProductRes>(`/products/${id}`),
+
+  getAvailability: (id: string, from?: string, to?: string) => {
+    const p = new URLSearchParams();
+    if (from) p.set("from", from);
+    if (to) p.set("to", to);
+    const query = p.toString();
+    return api.get<ProductAvailabilityRes>(`/products/${id}/availability${query ? `?${query}` : ""}`);
+  },
 
   create: (data: ProductCreateReq) =>
     api.post<ProductRes>("/products", data),
