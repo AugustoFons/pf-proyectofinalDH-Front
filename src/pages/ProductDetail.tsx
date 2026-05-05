@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { productService } from "../services/productService";
 import { TbArrowLeft, TbChevronLeft, TbChevronRight } from "react-icons/tb";
-import { HiExclamationCircle } from "react-icons/hi";
+import { HiExclamationCircle, HiHeart, HiOutlineHeart } from "react-icons/hi";
 import { getFeatureIcon } from "../constants/featureIcons";
 import { useAuth } from "../auth/AuthContext";
+import { useFavorites } from "../hooks/useFavorites";
 import type { ProductAvailabilityRes } from "../types/product";
 import AvailabilityCalendar from "../components/utils/AvailabilityCalendar";
 import { reservationService } from "../services/reservationService";
@@ -13,6 +14,7 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const [product, setProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -254,16 +256,30 @@ export default function ProductDetail() {
 
           {/* SIDEBAR DERECHA */}
           <aside className="col-span-12 lg:col-span-5">
-            <div className="bg-fb-surface border border-fb-stroke rounded-xl p-6 shadow-sm">
+            <div className="bg-fb-surface border border-fb-stroke rounded-xl p-6 shadow-sm relative">
 
-              {/* Flecha volver */}
-              <button
-                onClick={() => navigate(-1)}
-                className="text-fb-primary font-sans font-medium hover:underline float-right cursor-pointer flex items-center gap-[0.7px]"
-              >
-                <TbArrowLeft size={18} strokeWidth={2.5} />
-                Volver
-              </button>
+              {/* Acciones superiores (Volver y Favorito) */}
+              <div className="flex justify-between items-center mb-4">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="text-fb-primary font-sans font-medium hover:underline cursor-pointer flex items-center gap-[0.7px]"
+                >
+                  <TbArrowLeft size={18} strokeWidth={2.5} />
+                  Volver
+                </button>
+                
+                <button
+                  onClick={() => toggleFavorite(product.id)}
+                  className="p-2.5 rounded-full bg-blue-50 border border-blue-100 shadow-sm hover:bg-blue-100 transition-all cursor-pointer text-fb-primary"
+                  aria-label={isFavorite(product.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
+                >
+                  {isFavorite(product.id) ? (
+                    <HiHeart className="w-6 h-6" />
+                  ) : (
+                    <HiOutlineHeart className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
 
               {/* Título y precio */}
               <h1 className="text-xl font-semibold text-fb-text mb-1">

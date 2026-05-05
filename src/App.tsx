@@ -10,6 +10,7 @@ import ScrollToTop from "./components/utils/ScrollToTop";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
+import FavoritesPage from "./pages/FavoritesPage";
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
             <Route path="/producto/:id" element={<ProductDetail />} />
             <Route path='/perfil' element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path='/administracion' element={<ProtectedRoute requiredRole="ROLE_ADMIN"><Home adminMode={true} /></ProtectedRoute>} />
+            <Route path='/favoritos' element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
             <Route path='/administracion/usuarios' element={<ProtectedRoute requiredRole="ROLE_ADMIN"><AdminUsersPage /></ProtectedRoute>} />
             <Route path='/administracion/categorias' element={<ProtectedRoute requiredRole="ROLE_ADMIN"><AdminCategoriesPage /></ProtectedRoute>} />
             <Route path='/administracion/producto/nuevo' element={<ProtectedRoute requiredRole="ROLE_ADMIN"><AdminProductForm mode="create" /></ProtectedRoute>} />

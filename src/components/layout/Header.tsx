@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd, HiUsers, HiTag } from "react-icons/hi";
+import { HiMenu, HiX, HiPlus, HiCog, HiUserAdd, HiUsers, HiTag, HiHeart } from "react-icons/hi";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { BiAddToQueue } from "react-icons/bi";
 import { btnPrimary, btnGhost, btnSuccess, btnDangerGhost, mobileItem } from "../../styles/headerButtons";
@@ -136,6 +136,14 @@ export default function Header() {
                     <p className="text-sm font-semibold text-fb-text leading-tight">{fullName}</p>
                     <p className="text-xs text-fb-text-secondary truncate">{user.email}</p>
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsUserMenuOpen(false); closeMenu(); navigate("/favoritos"); }}
+                    className="mb-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left bg-fb-surface hover:bg-fb-neutral transition hover:text-fb-primary cursor-pointer text-fb-text"
+                  >
+                    <HiHeart className="w-5 h-5 text-fb-primary/80" />
+                    <span className="text-sm font-semibold">Mis Favoritos</span>
+                  </button>
                   <button className={`${btnDangerGhost} w-full justify-start rounded-lg`} onClick={handleLogout}>
                     <FiLogOut size={18} />
                     <span>Cerrar sesión</span>
@@ -232,6 +240,15 @@ export default function Header() {
                           <p className="text-sm font-semibold text-fb-text leading-tight">{fullName}</p>
                           <p className="text-xs text-fb-text-secondary truncate">{user.email}</p>
                         </div>
+                      </button>
+                      <button
+                        onClick={() => { closeMenu(); navigate("/favoritos"); }}
+                        className={mobileItem}
+                      >
+                        <span className="inline-flex items-center gap-2 text-fb-text hover:text-fb-primary">
+                          <HiHeart size={20} className="text-fb-primary/80" />
+                          Mis Favoritos
+                        </span>
                       </button>
                       <button onClick={handleLogout} className={mobileItem}>
                         <span className="inline-flex items-center gap-2">

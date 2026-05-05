@@ -1,8 +1,9 @@
 import { NavLink } from "react-router-dom";
 import { productService } from "../../services/productService";
-import { HiPencil, HiTrash } from "react-icons/hi";
+import { HiPencil, HiTrash, HiHeart, HiOutlineHeart } from "react-icons/hi";
 import { PopUp } from "../utils/PopUp";
 import { useState } from "react";
+import { useFavorites } from "../../hooks/useFavorites";
 
 type CardProps = {
   id: number;
@@ -16,11 +17,19 @@ type CardProps = {
 
 export function Card({ id, title, image, price, adminMode = false, onDeleted }: CardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const isFav = isFavorite(id);
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     window.location.href = `/administracion/producto/${id}/editar`;
+  };
+
+  const handleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(id);
   };
 
   const handleDelete = async () => {
@@ -35,9 +44,9 @@ export function Card({ id, title, image, price, adminMode = false, onDeleted }: 
   return (
     <>
       <NavLink to={`/producto/${id}`}>
-        <article className="relative bg-fb-surface border border-fb-stroke rounded-lg overflow-hidden shadow-sm">
+        <article className="relative bg-fb-surface border border-fb-stroke rounded-lg overflow-hidden shadow-sm group">
           {adminMode && (
-            <div className="absolute top-3 right-3 z-10 flex gap-1.5  transition-opacity duration-200">
+            <div className="absolute top-3 right-3 z-10 flex gap-1.5 transition-opacity duration-200">
               <button
                 onClick={handleEdit}
                 className="p-2 rounded-full bg-white/90 backdrop-blur-sm border border-fb-stroke shadow-sm hover:bg-white hover:border-blue-300 hover:text-fb-primary transition-all cursor-pointer"
@@ -64,9 +73,24 @@ export function Card({ id, title, image, price, adminMode = false, onDeleted }: 
             alt={title}
             className="w-full object-cover h-80"
           />
-          <div className="p-3">
-            <h2 className="font-sans text-sm font-bold text-fb-text">{title}</h2>
-            <p className="text-fb-text-secondary text-sm">${price?.toFixed(2)}</p>
+          <div className="p-3 flex justify-between items-center">
+            <div>
+              <h2 className="font-sans text-sm font-bold text-fb-text">{title}</h2>
+              <p className="text-fb-text-secondary text-sm">${price?.toFixed(2)}</p>
+            </div>
+            {!adminMode && (
+              <button
+                onClick={handleFavorite}
+                className="p-1.5 mr-1 rounded-full bg-blue-50 hover:bg-blue-100 transition-all cursor-pointer text-fb-primary"
+                aria-label={isFav ? "Quitar de favoritos" : "Añadir a favoritos"}
+              >
+                {isFav ? (
+                  <HiHeart className="w-6 h-6" />
+                ) : (
+                  <HiOutlineHeart className="w-6 h-6" />
+                )}
+              </button>
+            )}
           </div>
         </article>
       </NavLink>
